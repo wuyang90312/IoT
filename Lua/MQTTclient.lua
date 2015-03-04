@@ -35,9 +35,10 @@ m:on("message", function(conn, topic, data)
 m:connect("192.168.2.201", 1884, 0, function(conn) 
             print("connection Done") 
             -- subscribe topic with qos = 0
-            m:subscribe("test",0, function(conn) 
+            m:subscribe("sensors/temperature/TEMP_AD150023",0, function(conn) 
                           print("subscribe success") 
-                          m:publish("test","Connect with the broker",0,0, function(conn) print("sent") end)
+                          --m:publish("test","Connect with the broker",0,0, function(conn) print("sent") end)
+                          m:subscribe("sensors/temperature/TEMP_AD150014",0, function(conn) print("subscribe success2") end)
                         end)
             -- publish a message with data = hello, QoS = 0, retain = 0
             --m:publish("test","hello world",0,0, function(conn) print("sent") end)

@@ -42,20 +42,14 @@ tmr.alarm(2, 3*1000, 1, function()
                         m:connect("192.168.2.201", 1884, 0, function(conn) print("connection Done") end)
                       elseif index <= 2 then
                         print("wait a term")
-                      elseif index == 3 then
-                        m:subscribe("sensors/temperature/TEMP_AD150023",0, function(conn) print("success 1") end)
-                      elseif index == 4 then
-                        m:subscribe("sensors/temperature/TEMP_AD0",0, function(conn) print("success 2") end)
-                      elseif index == 5 then 
-                        m:subscribe("sensors/temperature/TEMP_AD1",0, function(conn)  print("success 3") end)
-                      --elseif index == 6 then
-                        --m:subscribe("sensors/temperature/TEMP_AD2",0, function(conn)  print("success 4") end)
-                      --elseif index == 9 then
-                        --m:subscribe("sensors/temperature/TEMP_AD3",0, function(conn)  print("success 5") end)
+                      elseif index <= 7 then
+                        dest = "sensors/temperature/TEMP_AD"..index
+                        m:subscribe(dest,0, function(conn) print("success") end)
                       else
                         m:publish("test","hello world ",0,0, function(conn) print("sent") end)
                       end
           end)
+
 
 --m:close()
 -- you can call m:connect again

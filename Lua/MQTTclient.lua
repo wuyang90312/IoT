@@ -1,3 +1,4 @@
+require "I2Cconn"
 -- init mqtt client with keepalive timer 120sec
 m = mqtt.Client("ESP_MQTT_1", 120, "", "")
 
@@ -11,11 +12,11 @@ m:lwt("/lwt", "offline", 0, 0)
 m:on("connect", function(con) print ("connect") end)
 m:on("offline", function(con) 
      print ("reconnecting...") 
-     tmr.alarm(1, 10*1000, 1, function()
-                m:connect("192.168.2.201", 1884, 0, function(conn)
-                print("reconnected")
-                end)
-              end)
+     --tmr.alarm(1, 10*1000, 1, function()
+                --m:connect("192.168.2.201", 1884, 0, function(conn)
+                --print("reconnected")
+                --end)
+              --end)
     end)
 
 -- on publish message receive event
@@ -37,6 +38,7 @@ m:on("message", function(conn, topic, data)
  --         end)
 index = 0
 state = false
+--step = 0 
 tmr.alarm(2, 3*1000, 1, function()
                       index = index +1
                       if index == 1 then
@@ -48,13 +50,24 @@ tmr.alarm(2, 3*1000, 1, function()
                         m:subscribe(dest,0, function(conn) print("success") end)
                       else
                         tmr.stop(2)
+                        index = 0
+                        init_config(SCALE_BIT)
                         state = true
                       end
           end)
 
-tmr.alarm(3, 60*1000, 1, function()
+tmr.alarm(3, 10*1000, 1, function()
       if state then
-        m:publish("test","hello world ",0,0, function(conn) print("sent") end)
+        
+        X = acquireData((0x33+index), (0x32+index))
+        --Y = acquireData(0x35, 0x34)
+        --Z = acquireData(0x37, 0x36)
+        m:publish("test", X,0,0, function(conn) 
+            print("sent"..index) 
+            index = (index+2)%6
+            
+            end)
+        
       else
         print("empty")
       end

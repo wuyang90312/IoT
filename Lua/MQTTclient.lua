@@ -36,6 +36,7 @@ m:on("message", function(conn, topic, data)
             --m:publish("test","hello world",0,0, function(conn) print("sent") end)
  --         end)
 index = 0
+state = false
 tmr.alarm(2, 3*1000, 1, function()
                       index = index +1
                       if index == 1 then
@@ -46,10 +47,17 @@ tmr.alarm(2, 3*1000, 1, function()
                         dest = "sensors/temperature/TEMP_AD"..index
                         m:subscribe(dest,0, function(conn) print("success") end)
                       else
-                        m:publish("test","hello world ",0,0, function(conn) print("sent") end)
+                        tmr.stop(2)
+                        state = true
                       end
           end)
 
-
+tmr.alarm(3, 60*1000, 1, function()
+      if state then
+        m:publish("test","hello world ",0,0, function(conn) print("sent") end)
+      else
+        print("empty")
+      end
+    end)
 --m:close()
 -- you can call m:connect again

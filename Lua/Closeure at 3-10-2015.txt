@@ -1,0 +1,3 @@
+The reason to close this project:
+1. ESP8266 has a limited memory space -- it is hard to run multiple functions simultanously.
+2. The Lua firmware for ESP8266 is not stable enough, especially in terms of the memory management.

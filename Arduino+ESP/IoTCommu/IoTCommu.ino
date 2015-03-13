@@ -1,6 +1,7 @@
 #include <SoftwareSerial.h>
+#include "StringModule.h"
 
-//SoftwareSerial mySerial(11, 12); //RX,TX
+String Storage;
 
 void setup()
 {
@@ -8,23 +9,15 @@ void setup()
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
-
-  Serial1.begin(57600);   // The ESP8826 has a baud rate of 115200
+  Serial1.begin(9600);   // The ESP8826 has a baud rate of 115200
 
   // Enable esp8266 
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
 
- // CommLaunch("AT\r", 1000, true);
-  CommLaunch("AT+RST\r", 4*1000, true);
- // CommLaunch("AT+CIOBAUD=57600\r", 4*1000, true);
-  delay(5*1000);
- // Serial1.begin(57600);   // The ESP8826 has a baud rate of 115200
- // CommLaunch("AT+RST\r", 4*1000, true);
-  
-  CommLaunch("AT+CWMODE=3\r", 1000, true);
-  CommLaunch("AT+CIFSR\r", 4*1000, true);
-  CommLaunch("AT+CWLAP\r", 4*1000, true);
+  ESPWIFIsetup(); /* set up the configuration of ESP chip */
+  ESPWIFIassociate();
+
 
 }
 
@@ -33,37 +26,68 @@ void loop() {
    
 }
 
-boolean CommLaunch(String cmd,unsigned int duration, boolean res)
+void ESPWIFIsetup()
+{
+  CommLaunch("AT+CIOBAUD?\r", 2*1000, true, 0);
+  CommLaunch("AT+RST\r", 2*1000, true, 0);
+  CommLaunch("AT+CWMODE=1\r", 1000, true, 0);
+  CommLaunch("AT+CIFSR\r", 2*1000, true, 0);
+  CommLaunch("AT+CWLAP\r", 6*1000, true, 1);
+}
+
+void ESPWIFIassociate()
+{
+  String usr,pw;
+  usr = "QoS";
+  pw = "23456";
+  
+  StringModule STR(Storage);
+  Serial.println("Storage: \n"+Storage);
+  if(STR.Contains(usr))
+  {
+    String asso = "AT+CWJAP=\""+usr+"\",\""+pw+"\"";
+    while(true)
+    {
+      CommLaunch(asso, 12*1000, true, 1);
+      Serial.println("Storage: \n"+Storage);
+      STR.ReplaceBase(Storage);
+      if(STR.Contains("OK"))
+        break;
+    }
+  }
+  else
+    Serial.println("[ERROR0] : no matching result!!");
+    
+   
+ 
+}
+
+boolean CommLaunch(String cmd,unsigned int duration, boolean res, int keyword)
 {
   Serial1.println(cmd);    //send command to ESP8266
-  //mySerial.flush();  //wait for the command finshes the sending
-  /* Display the Command on the Moniter */
-    Serial.println(cmd);
+
   if(res)
-    CommResponse("sth", duration);
+    CommResponse( keyword, duration);
 }
 
-void setUp()
-{
-  
-}
-
-void CommResponse(String keyword, unsigned int duration)
+void CommResponse(int keyword, unsigned int duration)
 {
   String tmp ="";
   long deadline = millis()+duration;
+  
   while(millis() < deadline)
   {
     while (Serial1.available()>0)  {
-      //tmp += char(mySerial.read());
-      //delay(15);
-      Serial.print(char(Serial1.read()));
+      tmp += char(Serial1.read());
     }
 
-    //if(tmp.length() > 0) {
-    //  Serial.print(tmp);
-    //  tmp = "";
-    //}
+    if(tmp.length() > 0) {
+      if(keyword==1)
+        Storage += tmp; // if the keyword is triggered, copy the string
+
+      Serial.print(tmp);
+      tmp = "";
+    }
   }
   Serial.println("\n------------------------------");
 }

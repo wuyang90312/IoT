@@ -6,7 +6,6 @@ String s;
 StringModule::StringModule(String base)
 {
   s = base;
-  base="";
 }
 
 boolean StringModule::Contains(String search) {
@@ -26,6 +25,5 @@ boolean StringModule::Contains(String search) {
 void StringModule::ReplaceBase(String base)
 {
   s = base;
-  base="";
   Serial.println(s);
 }

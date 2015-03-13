@@ -42,15 +42,18 @@ void ESPWIFIassociate()
   pw = "23456";
   
   StringModule STR(Storage);
-  Serial.println("Storage: \n"+Storage);
+  Storage = "";
+
   if(STR.Contains(usr))
   {
     String asso = "AT+CWJAP=\""+usr+"\",\""+pw+"\"";
     while(true)
     {
-      CommLaunch(asso, 12*1000, true, 1);
-      Serial.println("Storage: \n"+Storage);
+      CommLaunch(asso, 20*1000, true, 1);
+
       STR.ReplaceBase(Storage);
+      Storage = "";
+      
       if(STR.Contains("OK"))
         break;
     }
@@ -58,8 +61,8 @@ void ESPWIFIassociate()
   else
     Serial.println("[ERROR0] : no matching result!!");
     
-   
- 
+   Serial.println("FINISH ASSOCIATION!!");
+  CommLaunch("AT+CIFSR\r", 2*1000, true, 0); 
 }
 
 boolean CommLaunch(String cmd,unsigned int duration, boolean res, int keyword)

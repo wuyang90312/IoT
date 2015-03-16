@@ -2,6 +2,7 @@
 #include "StringModule.h"
 
 String s;
+String key;
 
 StringModule::StringModule(String base)
 {
@@ -9,14 +10,14 @@ StringModule::StringModule(String base)
 }
 
 boolean StringModule::Contains(String search) {
-  int end = search.length();
-  int max = s.length() - end;
+  int endP = search.length();
+  int maxP = s.length() - endP;
 
-  for (int i = 0; i <= max; i++) {
-    if (search.equals(s.substring(i, end)))
+  for (int i = 0; i <= maxP; i++) {
+    if (search.equalsIgnoreCase(s.substring(i, endP)))
       return true;
 
-    end++;
+    endP++;
   }
 
   return false;
@@ -25,5 +26,26 @@ boolean StringModule::Contains(String search) {
 void StringModule::ReplaceBase(String base)
 {
   s = base;
-  Serial.println(s);
+}
+
+void StringModule::StoreKey(String input) /* Store the string need to be delimited */
+{
+  key=input;
+}
+
+String StringModule::Delimitation(char delimiter)
+{
+  int length = key.length();
+  
+  for(int i =0; i< length; i++)
+  {
+    if(delimiter == key.charAt(i))
+    {
+        String sth = key.substring(0,i);
+        key = key.substring(i+1);
+        return sth;
+    }
+  }
+  
+  return key;
 }

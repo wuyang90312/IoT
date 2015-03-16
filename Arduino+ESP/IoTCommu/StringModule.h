@@ -9,8 +9,11 @@ class StringModule
 	  StringModule(String base);
 	  boolean Contains(String search);
           void ReplaceBase(String base);
+          void StoreKey(String input);
+          String Delimitation(char delimiter);
   private:
 	  String s;
+          String key;
 };
 
 #endif

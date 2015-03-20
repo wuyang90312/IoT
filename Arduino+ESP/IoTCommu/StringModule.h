@@ -1,7 +1,7 @@
 #ifndef STRINGMODULE_h
 #define STRINGMODULE_h
 
-#include "Arduino.h"
+#include <Arduino.h>
 
 class StringModule
 {

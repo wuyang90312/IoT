@@ -6,7 +6,7 @@ String Command;  /* Keep track of the command */
 int    Decision; /* Decide which kind of behavior of ESP should have */
 int   Count;
 
-int dummyData = 0;
+int dummyData = 40;
 const String  API_KEY = "GPVP0E6QQVWU47LZ";
 StringModule STR("");
 
@@ -189,7 +189,7 @@ void ESPDownload()
 
 void ESPFinish()
 {
-    CommLaunch("AT+CIPCLOSE", 2*1000, true, 0);
+    CommLaunch("AT+CIPCLOSE", 6*1000, true, 0);
     CommLaunch("AT+CWQAP", 2*1000, true, 0);
 }
 
@@ -242,6 +242,13 @@ boolean ESPCommandSucess(String KEY, int index)
 
     result = result || STR.Contains(component);
   }
+  
+  if(STR.Contains("busy"))
+  {
+    Serial.println("ENTER REST");
+    delay(1000);
+    Serial.println("EXIT REST");  
+}
   
   return result;
 }

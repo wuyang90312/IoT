@@ -24,6 +24,7 @@
 
 SCHEDULER::SCHEDULER(int threadNum, int duration)
 {
+  offset = 1;
   Duration = duration;
   MaxPosition = threadNum; 
   currentPosition = -1;
@@ -45,7 +46,7 @@ boolean SCHEDULER::addThread(const int limit, void (*func)(void))
   TimeLimit[currentPosition] = limit;
   CurrentTime[currentPosition] = limit;
   Address[currentPosition] = func; /* Store the function ptr to the array */
-  func();
+  //func();
   return true;
 }
 
@@ -61,6 +62,7 @@ void SCHEDULER::Display() /* Only used for the debugging purpose */
 
 void SCHEDULER::RoundRobin()
 {
+  int diff;
   long deadline = millis()+Duration;
   
   while(millis() < deadline)
@@ -72,16 +74,27 @@ void SCHEDULER::RoundRobin()
      
     for(int i=0; i<=currentPosition; i++)
     {
-       CurrentTime[i]--;
+       CurrentTime[i]-=offset;
        
-       if(CurrentTime[i] == 0){
-         CurrentTime[i] = TimeLimit[i];
-       }else if(CurrentTime[i] == 1){
+       if(CurrentTime[i] <= 1){
          stack.push(Address[i]);
        }
+       
+       if(CurrentTime[i] <= 0){
+         CurrentTime[i] = TimeLimit[i];
+       } 
     }
    
-   delay(deadline-millis()); 
+   diff = deadline-millis();
+   if(diff>0)
+   {
+     offset = 1;
+     delay(diff); 
+   }
+   else
+   {
+     offset = 1 - (int)(diff/Duration);
+   }
   }
 }
 

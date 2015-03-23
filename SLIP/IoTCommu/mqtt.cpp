@@ -93,7 +93,6 @@ void MQTT::subscribe(const char* topic, uint8_t qos)
   crc = esp->request(crc,(uint8_t*)topic, strlen(topic));
   crc = esp->request(crc,(uint8_t*)&qos, 1);
   esp->request(crc);
-
 }
 void MQTT::subscribe(const char* topic)
 {

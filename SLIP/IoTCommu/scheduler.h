@@ -18,6 +18,7 @@
 class SCHEDULER {
 
 private:
+  int offset;
   int Duration;
   int MaxPosition;
   int currentPosition;

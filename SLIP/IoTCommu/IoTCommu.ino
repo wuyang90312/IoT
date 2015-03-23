@@ -10,11 +10,10 @@
 #include "rest.h"
 #include "scheduler.h"
 
-//SoftwareSerial Serial1(2, 3); // RX, TX
 ESP esp(&Serial1, &Serial, 4);
 MQTT mqtt(&esp);
 REST rest(&esp);
-SCHEDULER sch(3, 1000); /* Configure the scheduler */
+SCHEDULER sch(3, 100); /* Configure the scheduler */
 
 boolean wifiConnected = false;
 //boolean mqttReady = false;
@@ -45,12 +44,12 @@ void mqttConnected(void* response)
   Serial.println("----------------------- mqtt Connected-------------------------------");
   mqtt.subscribe("/topic/0"); //or mqtt.subscribe("topic"); /*with qos = 0*/
   mqtt.subscribe("/topic/1");
-  mqtt.subscribe("/topic/2");
+ /* mqtt.subscribe("/topic/2");
   mqtt.subscribe("/topic/3");
   mqtt.subscribe("/topic/4");
   mqtt.subscribe("/topic/5");
   mqtt.subscribe("/topic/6");
-  mqtt.subscribe("/topic/7");
+  mqtt.subscribe("/topic/7");*/
 
 }
 void mqttDisconnected(void* response)
@@ -69,8 +68,6 @@ void mqttData(void* response)
   Serial.print("data=");
   String data = res.popString();
   Serial.println(data);
-  
-  //mqttReady = true;
 
 }
 void mqttPublished(void* response)
@@ -108,6 +105,11 @@ void setup() {
   Serial.println("ARDUINO: setup mqtt lwt");
   mqtt.lwt("/lwt", "offline", 0, 0); //or mqtt.lwt("/lwt", "offline");
 
+  Serial.println("SCHEDULER: Install the method into scheduler");
+  sch.addThread(200, &MQTTsend);
+  sch.addThread(600, &RESTupdate);
+  sch.addThread(3, &MQTTlisten);
+
   /*setup wifi*/
   Serial.println("ARDUINO: setup wifi");
   esp.wifiCb.attach(&wifiCb);
@@ -115,9 +117,7 @@ void setup() {
   esp.wifiConnect("BCRLovs","23456");
   Serial.println("ARDUINO: system started");
   
-  Serial.println("SCHEDULER: Install the method into scheduler");
-  sch.addThread(10, &MQTTlisten);
-  sch.addThread(30, &RESTupdate);
+  
 }
 
 
@@ -128,20 +128,21 @@ void loop() {
       mqtt.publish("/topic/0", "data0");
       delay(15*1000);
     }*/
-    Serial.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     sch.RoundRobin();
-    Serial.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-  }
-  else
+  }else
   {
-    Serial.println("----------------------------------------------->");
     esp.process();
-    Serial.println("<-----------------------------------------------");
   }
+}
+
+void MQTTsend()
+{
+  mqtt.publish("/topic/0", "data0");
 }
 
 void MQTTlisten()
 {
+  Serial.print(".");
   esp.process();
 }
 
@@ -159,5 +160,6 @@ void RESTupdate()
     Serial.println(response);
     dummyData+=5;
   }
+  return;
 }
 

@@ -22,8 +22,9 @@
 
 #include "scheduler.h"
 
-SCHEDULER::SCHEDULER(int threadNum)
+SCHEDULER::SCHEDULER(int threadNum, int duration)
 {
+  Duration = duration;
   MaxPosition = threadNum; 
   currentPosition = -1;
   TimeLimit = new int[MaxPosition];
@@ -55,6 +56,32 @@ void SCHEDULER::Display()
      Serial.println(TimeLimit[i]);
      //Serial.println((int)Address[i]); /* Print the address of the function */
      Address[i](); /* Call functions in the array */
+  }
+}
+
+void SCHEDULER::RoundRobin()
+{
+  long deadline = millis()+Duration;
+  
+  while(millis() < deadline)
+  {
+    if(!stack.isEmpty())
+    {
+      (stack.pop())();
+    }
+     
+    for(int i=0; i<=currentPosition; i++)
+    {
+       CurrentTime[i]--;
+       
+       if(CurrentTime[i] == 0){
+         CurrentTime[i] = TimeLimit[i];
+       }else if(CurrentTime[i] == 1){
+         stack.push(Address[i]);
+       }
+    }
+   
+   delay(deadline-millis()); 
   }
 }
 

@@ -1,11 +1,13 @@
+#include <StackList.h>
 #include "scheduler.h"
 
- SCHEDULER sch(5);
+SCHEDULER sch(5, 500);
+
 
 void setup()
 {
   Serial.begin(9600);
-  Serial.println("Start Setup");
+
   sch.addThread(50, &sample1);   
   sch.addThread(150,&sample2);
   sch.addThread(10, &sample3);
@@ -14,9 +16,8 @@ void setup()
 void loop()
 {
   Serial.println("--------------->");
-  sch.Display();
+  sch.RoundRobin();
   Serial.println("<---------------");  
-  delay(30*1000);
 }
 
 void sample1()

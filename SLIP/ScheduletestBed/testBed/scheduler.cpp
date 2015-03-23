@@ -1,7 +1,7 @@
 /**
- * @file    FP.cpp
- * @brief   Core Utility - Templated Function Pointer Class
- * @author  sam grove
+ * @file    scheduler.cpp
+ * @brief   Configure a scheduler to manage multiple threads
+ * @author  Yang Wu
  * @version 1.0
  * @see     
  *
@@ -28,9 +28,10 @@ SCHEDULER::SCHEDULER(int threadNum)
   currentPosition = -1;
   TimeLimit = new int[MaxPosition];
   CurrentTime = new int[MaxPosition];
+  Address = new ptrFunction[MaxPosition];
 }
 
-boolean SCHEDULER::addThread(int limit)//, void* func)
+boolean SCHEDULER::addThread(const int limit, void (*func)(void))
 {
   currentPosition ++; /* Once if the new thread is added, the position moves to the nxt position */
   
@@ -42,7 +43,8 @@ boolean SCHEDULER::addThread(int limit)//, void* func)
   
   TimeLimit[currentPosition] = limit;
   CurrentTime[currentPosition] = limit;
-  
+  Address[currentPosition] = func; /* Store the function ptr to the array */
+  func();
   return true;
 }
 
@@ -51,6 +53,8 @@ void SCHEDULER::Display()
   for(int i=0; i<=currentPosition; i++)
   {
      Serial.println(TimeLimit[i]);
+     //Serial.println((int)Address[i]); /* Print the address of the function */
+     Address[i](); /* Call functions in the array */
   }
 }
 

@@ -22,10 +22,12 @@ private:
   int currentPosition;
   int *TimeLimit;
   int *CurrentTime;
+  typedef void (*ptrFunction)(void); /* Define a type of the function */
+  ptrFunction *Address;
 
 public:
   SCHEDULER(int threadNum);
-  boolean addThread(int limit);//, void* func); 
+  boolean addThread(int limit, void (*func)(void)); 
   void Display();
 
 };

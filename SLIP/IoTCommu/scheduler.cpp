@@ -1,7 +1,7 @@
 /**
- * @file    FP.cpp
- * @brief   Core Utility - Templated Function Pointer Class
- * @author  sam grove
+ * @file    scheduler.cpp
+ * @brief   Configure a scheduler to manage multiple threads
+ * @author  Yang Wu
  * @version 1.0
  * @see     
  *
@@ -22,33 +22,66 @@
 
 #include "scheduler.h"
 
-SCHEDULER::SCHEDULER(int threadNum)
+SCHEDULER::SCHEDULER(int threadNum, int duration)
 {
+  Duration = duration;
   MaxPosition = threadNum; 
   currentPosition = -1;
-  TimeLimit[] = new int[MaxPosition];
-  CurrentTime[] = new int[MaxPosition];
+  TimeLimit = new int[MaxPosition];
+  CurrentTime = new int[MaxPosition];
+  Address = new ptrFunction[MaxPosition];
 }
 
-void SCHEDULER::addThread(int limit)//, void* func)
+boolean SCHEDULER::addThread(const int limit, void (*func)(void))
 {
   currentPosition ++; /* Once if the new thread is added, the position moves to the nxt position */
   
   if(currentPosition >= MaxPosition)
   {
     Serial.println("[ERROR] Out of index ");
-    return; 
+    return false; 
   }
   
   TimeLimit[currentPosition] = limit;
   CurrentTime[currentPosition] = limit;
+  Address[currentPosition] = func; /* Store the function ptr to the array */
+  func();
+  return true;
 }
 
-void SCHEDULER::Display()
+void SCHEDULER::Display() /* Only used for the debugging purpose */
 {
   for(int i=0; i<=currentPosition; i++)
   {
      Serial.println(TimeLimit[i]);
+     //Serial.println((int)Address[i]); /* Print the address of the function */
+     Address[i](); /* Call functions in the array */
+  }
+}
+
+void SCHEDULER::RoundRobin()
+{
+  long deadline = millis()+Duration;
+  
+  while(millis() < deadline)
+  {
+    if(!stack.isEmpty())
+    {
+      (stack.pop())();
+    }
+     
+    for(int i=0; i<=currentPosition; i++)
+    {
+       CurrentTime[i]--;
+       
+       if(CurrentTime[i] == 0){
+         CurrentTime[i] = TimeLimit[i];
+       }else if(CurrentTime[i] == 1){
+         stack.push(Address[i]);
+       }
+    }
+   
+   delay(deadline-millis()); 
   }
 }
 

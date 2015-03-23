@@ -1,9 +1,10 @@
 /**
  * \file
- *       ESP8266 MQTT Bridge example
+ *       ESP8266 run MQTT and REST API simultaneously
  * \author
- *       Tuan PM <tuanpm@live.com>
+ *       Yang Wu
  */
+#include <StackList.h>
 #include "espduino.h"
 #include "mqtt.h"
 #include "rest.h"
@@ -13,9 +14,10 @@
 ESP esp(&Serial1, &Serial, 4);
 MQTT mqtt(&esp);
 REST rest(&esp);
+SCHEDULER sch(3, 1000); /* Configure the scheduler */
 
 boolean wifiConnected = false;
-boolean mqttReady = false;
+//boolean mqttReady = false;
 int dummyData =25;
 
 void wifiCb(void* response)
@@ -68,7 +70,7 @@ void mqttData(void* response)
   String data = res.popString();
   Serial.println(data);
   
-  mqttReady = true;
+  //mqttReady = true;
 
 }
 void mqttPublished(void* response)
@@ -76,6 +78,7 @@ void mqttPublished(void* response)
 
 }
 void setup() {
+  Serial.println("ARDUINO: setup the serial communication");
   Serial1.begin(19200);
   Serial.begin(19200);
   esp.enable();
@@ -83,12 +86,6 @@ void setup() {
   esp.reset();
   delay(500);
   while(!esp.ready());
-
-  /*setup mqtt events */
-  mqtt.connectedCb.attach(&mqttConnected);
-  mqtt.disconnectedCb.attach(&mqttDisconnected);
-  mqtt.publishedCb.attach(&mqttPublished);
-  mqtt.dataCb.attach(&mqttData);
 
   Serial.println("ARDUINO: setup rest client");
   if(!rest.begin("api.thingspeak.com")) {
@@ -101,7 +98,12 @@ void setup() {
     Serial.println("ARDUINO: fail to setup mqtt");
     while(1);
   }
-
+  
+  /*setup mqtt events */
+  mqtt.connectedCb.attach(&mqttConnected);
+  mqtt.disconnectedCb.attach(&mqttDisconnected);
+  mqtt.publishedCb.attach(&mqttPublished);
+  mqtt.dataCb.attach(&mqttData);
 
   Serial.println("ARDUINO: setup mqtt lwt");
   mqtt.lwt("/lwt", "offline", 0, 0); //or mqtt.lwt("/lwt", "offline");
@@ -112,32 +114,50 @@ void setup() {
 
   esp.wifiConnect("BCRLovs","23456");
   Serial.println("ARDUINO: system started");
+  
+  Serial.println("SCHEDULER: Install the method into scheduler");
+  sch.addThread(10, &MQTTlisten);
+  sch.addThread(30, &RESTupdate);
 }
 
 
 void loop() {
-  char response[266];
-  esp.process();
   if(wifiConnected) {
- /*   char buff[64];
-    sprintf(buff, "/update?api_key=GPVP0E6QQVWU47LZ&field1=%d", dummyData);
-    Serial.println(buff);
-    rest.get((const char*)buff);
-    Serial.println("ARDUINO: send get");
-
-    if(rest.getResponse(response, 266) == HTTP_STATUS_OK){
-      Serial.println("ARDUINO: GET successful");
-      Serial.println(response);
-      dummyData+=5;
-    }*/
-    //Serial.println("Somthing Happened");
-    //delay(3*1000)
-    
-    if(mqttReady)
+    /*if(mqttReady)
     {
       mqtt.publish("/topic/0", "data0");
       delay(15*1000);
-    }
-
+    }*/
+    Serial.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    sch.RoundRobin();
+    Serial.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+  }
+  else
+  {
+    Serial.println("----------------------------------------------->");
+    esp.process();
+    Serial.println("<-----------------------------------------------");
   }
 }
+
+void MQTTlisten()
+{
+  esp.process();
+}
+
+void RESTupdate()
+{
+  char response[266];
+  char buff[64];
+  sprintf(buff, "/update?api_key=GPVP0E6QQVWU47LZ&field1=%d", dummyData);
+  Serial.println(buff);
+  rest.get((const char*)buff);
+  Serial.println("ARDUINO: send get");
+
+  if(rest.getResponse(response, 266) == HTTP_STATUS_OK){
+    Serial.println("ARDUINO: GET successful");
+    Serial.println(response);
+    dummyData+=5;
+  }
+}
+

@@ -44,12 +44,12 @@ void mqttConnected(void* response)
   Serial.println("----------------------- mqtt Connected-------------------------------");
   mqtt.subscribe("/topic/0"); //or mqtt.subscribe("topic"); /*with qos = 0*/
   mqtt.subscribe("/topic/1");
- /* mqtt.subscribe("/topic/2");
+  mqtt.subscribe("/topic/2");
   mqtt.subscribe("/topic/3");
   mqtt.subscribe("/topic/4");
   mqtt.subscribe("/topic/5");
   mqtt.subscribe("/topic/6");
-  mqtt.subscribe("/topic/7");*/
+  mqtt.subscribe("/topic/7");
 
 }
 void mqttDisconnected(void* response)
@@ -123,11 +123,7 @@ void setup() {
 
 void loop() {
   if(wifiConnected) {
-    /*if(mqttReady)
-    {
-      mqtt.publish("/topic/0", "data0");
-      delay(15*1000);
-    }*/
+
     sch.RoundRobin();
   }else
   {
@@ -142,7 +138,6 @@ void MQTTsend()
 
 void MQTTlisten()
 {
-  Serial.print(".");
   esp.process();
 }
 

@@ -65,14 +65,13 @@ void SCHEDULER::RoundRobin()
   int diff;
   long deadline = millis()+Duration;
   
-  while(millis() < deadline)
-  {
+
     if(!stack.isEmpty())
     {
       (stack.pop())();
     }
      
-    for(int i=0; i<=currentPosition; i++)
+    for(int i=0; i<=currentPosition-1; i++) 
     {
        CurrentTime[i]-=offset;
        
@@ -85,6 +84,16 @@ void SCHEDULER::RoundRobin()
        } 
     }
    
+   /* keep the last index as highest priority so that the last index keeps running until meet a stack*/
+   if(stack.isEmpty())
+   {
+     while(millis()<=deadline)
+     {
+       Address[currentPosition]();
+     }
+     return;
+   }
+   
    diff = deadline-millis();
    if(diff>0)
    {
@@ -95,7 +104,7 @@ void SCHEDULER::RoundRobin()
    {
      offset = 1 - (int)(diff/Duration);
    }
-  }
+  
 }
 
 

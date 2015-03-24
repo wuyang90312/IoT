@@ -77,11 +77,8 @@ void SCHEDULER::RoundRobin()
        
        if(CurrentTime[i] <= 1){
          stack.push(Address[i]);
-       }
-       
-       if(CurrentTime[i] <= 0){
          CurrentTime[i] = TimeLimit[i];
-       } 
+       }
     }
    
    /* keep the last index as highest priority so that the last index keeps running until meet a stack*/

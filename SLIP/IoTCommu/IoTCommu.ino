@@ -108,7 +108,8 @@ void setup() {
   Serial.println("SCHEDULER: Install the method into scheduler");
   sch.addThread(200, &MQTTsend);
   sch.addThread(600, &RESTupdate);
-  sch.addThread(3, &MQTTlisten);
+  /*we want to make MQTTlisten as a background thread, so put it in the highest index*/
+  sch.addThread(3, &MQTTlisten); 
 
   /*setup wifi*/
   Serial.println("ARDUINO: setup wifi");

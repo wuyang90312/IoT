@@ -1,7 +1,14 @@
-/* This code is written to set up the serial communication between
-* Windows PC and ESP8266 ESP-01 Wifi unit
-* January 27th 2015     Yang Wu   */
-
+/*
+* ----------------------------------------------------------------------------
+* "THE BEER-WARE LICENSE" (Revision 42):
+* <wuyang90312@gmail.com> wrote this file.  As long as you retain this notice you
+* can do whatever you want with this stuff. If we meet some day, and you think
+* this stuff is worth it, you can buy me a beer in return.   Yang Wu
+* ----------------------------------------------------------------------------
+* This code is written to set up the serial communication between Windows PC and
+* ESP8266 ESP-01 Wifi unit. As well, conceptual prove the Web server on ESP8266
+* March 26th 2015
+*/
 #using <System.dll>
 
 using namespace System;

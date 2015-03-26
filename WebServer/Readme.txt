@@ -1,3 +1,8 @@
+The purpose of this folder is to set up a Web browser as user interface as well as to explore the possibility of
+storing data permanently. Therefore, users can configure the setting of ESP board and reboot the board with the
+same configuration.
+
+-----------------------------------------------------------------------------------------------------------------
 <WebServer.lua> is the initial example file from the Internet, which tells the mechanism of hosting a webserver
 on ESP8266. I have modified a bit the code in order to access 192.168.4.1(IP of the AP mode). Hence, user can
 access it as either AP(192.168.4.1) or STA(192.168.2.XXX).

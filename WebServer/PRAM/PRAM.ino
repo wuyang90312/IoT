@@ -13,7 +13,7 @@ uint16_t CLOUD_PORT = 654;
 void setup()
 {
   Serial.begin(9600);
-  if(StateConfig())
+  /*if(readConfig())
   {
     Serial.println("Set all values back to the default");
     reset(1024);
@@ -27,8 +27,19 @@ void setup()
   setCLOUDPort(CLOUD_PORT);
   setSSID("BCRLovs");
   setPWD("23456");
-  AlreadyConfig();
+  setConfig();
   
+  delay(5*1000); */
+  
+  Serial.println(readConfig());
+  Serial.println(readMode());
+  Serial.println(readSTAIP());
+  Serial.println(readMQTTIP());
+  Serial.println(readCLOUDIP());
+  Serial.println(readMQTTPort());
+  Serial.println(readCLOUDPort());
+  Serial.println(readSSID());
+  Serial.println(readPWD());
 }
 
 // Display the data stored in EEPROM
@@ -60,7 +71,7 @@ void reset(int Length)
      EEPROM.write(i, 255);
 }
 
-boolean StateConfig()
+boolean readConfig()
 {
    if(EEPROM.read(0)==0)
      return true;
@@ -72,7 +83,7 @@ boolean StateConfig()
      return false;
 }
 
-void AlreadyConfig()
+void setConfig()
 {
   EEPROM.write(0,0);
 }
@@ -80,6 +91,12 @@ void AlreadyConfig()
 void setMode(uint8_t input)
 {
   EEPROM.write(7, input); 
+}
+
+int readMode()
+{
+  uint8_t tmp = EEPROM.read(7);
+  return tmp;
 }
 
 void setIP(uint8_t location,int IP[4])
@@ -90,9 +107,28 @@ void setIP(uint8_t location,int IP[4])
   } 
 }
 
+String  readIP(uint8_t location)
+{
+  String tmp;
+  
+  for(int i=0; i < 3; i++)
+  {
+    tmp +=EEPROM.read(location+i);
+    tmp +=".";
+  }
+  tmp +=EEPROM.read(location+3);
+  
+  return tmp;
+}
+
 void setSTAIP(int IP[4])
 {
   setIP(8, IP);
+}
+
+String readSTAIP()
+{
+ return readIP(8); 
 }
 
 void setMQTTIP(int IP[4])
@@ -100,9 +136,19 @@ void setMQTTIP(int IP[4])
     setIP(12, IP);
 }
 
+String readMQTTIP()
+{
+  return readIP(12);
+}
+
 void setCLOUDIP(int IP[4])
 {
    setIP(18, IP);
+}
+
+String readCLOUDIP()
+{
+  return readIP(18);
 }
 
 void setPORT(uint8_t location, uint16_t port)
@@ -110,14 +156,32 @@ void setPORT(uint8_t location, uint16_t port)
   store16BIT(location, port);
 }
 
+uint16_t readPORT(uint8_t location)
+{
+  uint16_t tmp = EEPROM.read(location);
+  tmp += EEPROM.read(location+1)*256;
+  
+  return tmp;
+}
+
 void setMQTTPort(uint16_t port)
 {
    setPORT(16, port);
 }
 
+uint16_t readMQTTPort()
+{
+   return readPORT(16); 
+}
+
 void setCLOUDPort(uint16_t port)
 {
    setPORT(22, port);
+}
+
+uint16_t readCLOUDPort()
+{
+   return readPORT(22); 
 }
 
 void store16BIT(uint8_t location, uint16_t value)
@@ -148,12 +212,39 @@ void storeString(uint8_t length, uint16_t location, String input)
   }
 }
 
+String readSTRING(uint8_t location)
+{
+   String resp;
+   char   tmp;
+   uint8_t length = EEPROM.read(location+2);
+   uint16_t loc = EEPROM.read(location);
+   loc +=  EEPROM.read(location+1)*256;
+   
+   for(int i = loc; i<(length+loc);i++)
+   {
+     tmp = EEPROM.read(i);
+     resp += tmp;
+   }
+   
+   return resp;
+}
+
 void setSSID(String input)
 {
   setString(1, 24, input);
 }
 
+String readSSID()
+{
+  return readSTRING(1); 
+}
+
 void setPWD(String input)
 {
  setString(4, (24+LENGTH), input);
+}
+
+String readPWD()
+{
+   return readSTRING(4); 
 }

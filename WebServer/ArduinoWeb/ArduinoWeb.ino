@@ -11,7 +11,7 @@ int   Count;
 int dummyData = 40;
 const String  API_KEY = "GPVP0E6QQVWU47LZ";
 StringModule STR("");
-PROM PROM();
+PROM prom;
 
 void setup()
 {
@@ -61,13 +61,13 @@ boolean uploadUI(char ID)
   String msg,result;
   resp = "<h1> ESP8266 Web Server</h1>\n";
   resp +="<form  method=\"get\">";
-  resp += "<p>SSID &nbsp; <input type=\"text\" name=\"SSID\" value=\"SSID\"><br>";
-  resp += "PWD &nbsp; <input type=\"text\" name=\"PAWD\" value=\"PASSWORD\"><br>";
-  resp += "STA IP &nbsp; <input type=\"text\" name=\"STIP\" value=\"STA IP\"><br>";
-  resp += "MQTT IP &nbsp; <input type=\"text\" name=\"MQIP\" value=\"MQTT IP\"><br>";
-  resp += "CLOUD IP &nbsp; <input type=\"text\" name=\"CLIP\" value=\"CLOUD IP\"><br>";
-  resp += "MQTT PORT &nbsp; <input type=\"text\" name=\"MPRT\" value=\"MQTT PORT\"><br>";
-  resp += "CLOUD PORT &nbsp; <input type=\"text\" name=\"CPRT\" value=\"CLOUD PORT\"><br></p>";
+  resp += "<p>SSID &nbsp; <input type=\"text\" name=\"SSID\"><br>";
+  resp += "PWD &nbsp; <input type=\"text\" name=\"PAWD\"><br>";
+  resp += "STA IP &nbsp; <input type=\"text\" name=\"STIP\"><br>";
+  resp += "MQTT IP &nbsp; <input type=\"text\" name=\"MQIP\"><br>";
+  resp += "CLOUD IP &nbsp; <input type=\"text\" name=\"CLIP\"><br>";
+  resp += "MQTT PORT &nbsp; <input type=\"text\" name=\"MPRT\"><br>";
+  resp += "CLOUD PORT &nbsp; <input type=\"text\" name=\"CPRT\"><br></p>";
   resp += "<a type=\"submit\" value=\"submit\"><button>SUBMIT</button></a>";
   resp += "</form>\r";
   msg = "AT+CIPSEND=";
@@ -88,9 +88,45 @@ boolean uploadUI(char ID)
   Serial.println(result);
   /*deliminate the extracted information*/
   STR.StoreKey(result);
-  for(int i = 0; i < 7; i++)
-    Serial.println(STR.Delimitation('&').substring(5));
+  /*****************Information stored in the URL*************************/
+  String ssid, pwd;
+  uint8_t IP[3][4];
+  uint16_t PORT[2];
+  /*****************Information stored in the URL*************************/
+  ssid = STR.Delimitation('&').substring(5);
+  pwd = STR.Delimitation('&').substring(5);
+  //Serial.println("Password:");
+ // Serial.println(pwd);
+  
+  for(int i = 0; i < 3; i++)
+  {
+     IP[i][0] = (uint8_t)converToInt(STR.Delimitation('.').substring(5));
+    for(int j=1; j<3; j++)
+    {
+      IP[i][j] = (uint8_t)converToInt(STR.Delimitation('.'));
+    }
+    IP[i][3] = (uint8_t)converToInt(STR.Delimitation('&'));
+  }
+  
+  for(int i = 0; i < 2; i++)
+  {
+    PORT[i] = (uint16_t)converToInt(STR.Delimitation('&').substring(5));
     
+  }
+  prom.reset(512);
+  prom.Flash(1, IP[0], IP[1], IP[2], PORT[0],PORT[1], ssid, pwd);  
+  
+  delay(5*1000);
+  Serial.println(prom.readConfig());
+  Serial.println(prom.readMode());
+  Serial.println(prom.readSTAIP());
+  Serial.println(prom.readMQTTIP());
+  Serial.println(prom.readCLOUDIP());
+  Serial.println(prom.readMQTTPort());
+  Serial.println(prom.readCLOUDPort());
+  Serial.println(prom.readSSID());
+  Serial.println(prom.readPWD());
+  
   return true;
 }
 
@@ -108,6 +144,7 @@ String Waitresponse()
         startP =STR.readPosition();
         if(STR.Contains("HTTP/"))
         {
+          Serial.println(F("-----------------GET&&HTTP--------------------"));
           endP= STR.readPosition()-6;
           result = STR.Storage.substring(startP,endP);
           STR.Storage = "";
@@ -131,11 +168,10 @@ String Waitresponse()
   return result;
 }
 
-uint8_t converToUint8(String input)
+int converToInt(String input)
 {
-   uint8_t result = (uint8_t)input.toInt();
-  
-  return result; 
+  //Serial.println(input.toInt());
+   return input.toInt();
 }
 
 void Configuration()

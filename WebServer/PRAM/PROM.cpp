@@ -93,8 +93,12 @@ String PROM::readSTRING(uint8_t location)
    return resp;
 }
 /*-------------------------------SET Functions-------------------------------------------*/
+PROM::PROM()
+{
+  
+}
 
-PROM::PROM(int Mode, uint8_t STA_IP[4], uint8_t MQTT_IP[4], uint8_t CLOUD_IP[4], uint16_t MQTT_PORT,uint16_t CLOUD_PORT,String ssid, String pwd)
+void PROM::Flash(int Mode, uint8_t STA_IP[4], uint8_t MQTT_IP[4], uint8_t CLOUD_IP[4], uint16_t MQTT_PORT,uint16_t CLOUD_PORT,String ssid, String pwd)
 {
   setMode(Mode);
   setSTAIP(STA_IP);

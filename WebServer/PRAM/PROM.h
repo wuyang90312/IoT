@@ -29,7 +29,8 @@ private:
   String readSTRING(uint8_t location);
   
 public:
-  PROM(int Mode, uint8_t STA_IP[4], uint8_t MQTT_IP[4], uint8_t CLOUD_IP[4], uint16_t MQTT_PORT,uint16_t CLOUD_PORT,String ssid, String pwd);
+  PROM();
+  void Flash(int Mode, uint8_t STA_IP[4], uint8_t MQTT_IP[4], uint8_t CLOUD_IP[4], uint16_t MQTT_PORT,uint16_t CLOUD_PORT,String ssid, String pwd);
   void reset(int Length);
   void setConfig();
   void setMode(uint8_t input);

@@ -15,9 +15,9 @@ String PWD = "123456";
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   
-  PROM prom(1, STA_IP, MQTT_IP, CLOUD_IP, MQTT_PORT, CLOUD_PORT, _SSID, PWD);
+  PROM prom;
   Serial.println(prom.readConfig());
   Serial.println(prom.readMode());
   Serial.println(prom.readSTAIP());
@@ -29,12 +29,12 @@ void setup()
   Serial.println(prom.readPWD());
   delay(5*1000);
   
-  if(prom.readConfig())
+ /* if(prom.readConfig())
   {
     Serial.println("Set all values back to the default");
     prom.reset(1024);
     Serial.println("Done with setting");
-  }
+  }*/
   /*setMode(1);
   setSTAIP(STA_IP);
   setMQTTIP(MQTT_IP);

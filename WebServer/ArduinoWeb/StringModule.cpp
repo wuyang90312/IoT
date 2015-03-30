@@ -7,17 +7,19 @@
 
 StringModule::StringModule(String base)
 {
-  s = base;
+  Storage = base;
 }
 
 boolean StringModule::Contains(String search) {
   int endP = search.length();
-  int maxP = s.length() - endP;
+  int maxP = Storage.length() - endP;
 
   for (int i = 0; i <= maxP; i++) {
-    if (search.equalsIgnoreCase(s.substring(i, endP)))
+    if (search.equalsIgnoreCase(Storage.substring(i, endP)))
     {
       END_POSITION = endP;
+      Serial.println();
+      Serial.println(Storage.substring(i, endP));
       return true;
     }
 
@@ -32,10 +34,12 @@ int StringModule::readPosition()
    return END_POSITION; 
 }
 
-void StringModule::ReplaceBase(String base)
+/*void StringModule::ReplaceBase(String base)
 {
   s = base;
-}
+  END_POSITION=0;
+  Serial.println(s);
+}*/
 
 void StringModule::StoreKey(String input) /* Store the string need to be delimited */
 {

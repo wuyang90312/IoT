@@ -6,6 +6,7 @@
 class StringModule
 {
   public:
+          String Storage;
 	  StringModule(String base);
 	  boolean Contains(String search);
           void ReplaceBase(String base);
@@ -13,7 +14,6 @@ class StringModule
           String Delimitation(char delimiter);
           int readPosition();
   private:
-	  String s;
           String key;
           int END_POSITION;
 };

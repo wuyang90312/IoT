@@ -4,7 +4,6 @@
 
 /* 1 KB (ATmega32u4)*/
 String resp;
-String Storage;  /* Store the important information from ESP reponse */
 String Command;  /* Keep track of the command */
 int    Decision; /* Decide which kind of behavior of ESP should have */
 int   Count;
@@ -43,21 +42,21 @@ void UIweb()
   while(true)
   {
     CommResponse(1, 100); // Wait for the HTTP access
-    if(Storage.length()>0)
+    if(STR.Storage.length()>0)
     {
-      STR.ReplaceBase(Storage);
+    //  STR.ReplaceBase(Storage);
       if(STR.Contains("+IPD,"))
       {
         Serial.println("---------------CHECK----------------");
-        ChannelID = Storage.charAt(STR.readPosition()); 
-        Storage = "";
+        ChannelID = STR.Storage.charAt(STR.readPosition()); 
+        STR.Storage = ""; // Clear the memory for nxt time
         CommResponse(0, 5000); // Wait for HTTP response to finish
         uploadUI(ChannelID);
         break;
       }
     }
 
-    Storage = "";// Clear the memory for nxt time
+    STR.Storage = "";// Clear the memory for nxt time
   }
 }
 
@@ -84,7 +83,7 @@ boolean uploadUI(char ID)
   msg = "AT+CIPCLOSE=";
   msg +=ID;
   msg +="\r";
-  CommLaunch(msg, 4*1000, true, 0);
+  CommLaunch(msg, 0, true, 0);
   
   return Waitresponse();
 }
@@ -96,41 +95,46 @@ boolean Waitresponse()
   while(true)
   {
     CommResponse(1, 100); // Wait for the HTTP access
-    if(Storage.length()>0)
+    if(STR.Storage.length()>0)
     {
+      
+       Serial.println(">>>>>>");
+      Serial.println(STR.Storage);
       Serial.println(">>>>>>");
-      Serial.println(Storage);
+      
       Serial.println(startP);
       Serial.println(endP);
       Serial.println("<<<<<<<");
-      STR.ReplaceBase(Storage);
-      if(startP ==0 && STR.Contains("GET /?"))
+      if(STR.Contains("GET"))
       {
         Serial.println("---------------GET----------------");
-        startP =STR.readPosition();
+        startP =STR.readPosition()+3;
+        Serial.println(startP);
         if(STR.Contains("HTTP"))
         {
           Serial.println("---------------HTTP----------------");
-          endP= STR.readPosition()-8;
-          result = Storage.substring(startP,endP);
-          Storage = "";
+          endP= STR.readPosition()-5;
+          result = STR.Storage.substring(startP,endP);
+          STR.Storage = "";
           break;
+        }else
+        {
+         result = STR.Storage.substring(startP);
+         Serial.println(result); 
         }
-      }else if(startP > 0&&STR.Contains("HTTP"))
+      }else if(startP && STR.Contains("HTTP"))
       {
         Serial.println("---------------HTTP----------------");
-        endP= STR.readPosition()-8;
-        result = Storage.substring(startP,endP);
-        Storage = "";
+        endP= STR.readPosition()-5;
+         Serial.println(endP);
+        result += STR.Storage.substring(0,endP);
+        STR.Storage = "";
         break;
-      }else
-      {
-       Storage=""; 
       }
-      
+       STR.Storage="";
     }
   }
-  Serial.println("---------------CHECK----------------");
+  Serial.println("---------------RESULT----------------");
   Serial.println(result);
   
   return true;
@@ -158,8 +162,8 @@ void ESPWIFIassociate(String usr, String pw)
 {
   String asso;
   
-  STR.ReplaceBase(Storage);
-  Storage = ""; // Clear the memory for nxt time
+ // STR.ReplaceBase(Storage);
+ // Storage = ""; // Clear the memory for nxt time
 
   if(STR.Contains(usr))
   {
@@ -273,7 +277,7 @@ void CommResponse(int keyword, unsigned int duration)
 
     if(tmp.length() > 0) {
       if(keyword==1)
-        Storage += tmp; // if the keyword is triggered, copy the string
+        STR.Storage += tmp; // if the keyword is triggered, copy the string
 
       Serial.print(tmp);
       tmp = "";
@@ -284,8 +288,8 @@ void CommResponse(int keyword, unsigned int duration)
 boolean ESPCommandSucess(String KEY, int index)
 {
   int iteration;
-  STR.ReplaceBase(Storage);
-  Storage = "";
+ // STR.ReplaceBase(Storage);
+//  Storage = "";
   
   if(index==1)
     return STR.Contains(KEY);

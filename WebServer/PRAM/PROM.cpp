@@ -60,16 +60,15 @@ void PROM::setString(uint16_t recordLocation, uint16_t location, String input)
 {
   /* Take record of where to store the string */
   store16BIT(recordLocation, location);
-  uint8_t length = input.length();
-  LENGTH = length;
-  EEPROM.write((recordLocation+2), length);
-  storeString(length, location, input);
+  uint8_t Length = input.length();
+  EEPROM.write((recordLocation+2), Length);
+  storeString(Length, location, input);
 }
 
-void PROM::storeString(uint8_t length, uint16_t location, String input)
+void PROM::storeString(uint8_t Length, uint16_t location, String input)
 {
   uint8_t tmp;
-  for(int i = location; i<(location+length); i++)
+  for(int i = location; i<(location+Length); i++)
   {
     tmp = input[i-location];
     EEPROM.write(i, tmp);
@@ -154,12 +153,22 @@ void PROM::setCLOUDPort(uint16_t port)
 
 void PROM::setSSID(String input)
 {
-  setString(1, 24, input);
+  setString(1, 124, input);
 }
 
 void PROM::setPWD(String input)
 {
- setString(4, (24+LENGTH), input);
+  uint8_t tmp = EEPROM.read(3);
+  setString(4, (124+tmp), input);
+}
+
+void PROM::setAPI(String input)
+{
+   uint8_t tmp = EEPROM.read(6);
+   uint16_t location = readPORT(4);
+   location +=tmp;
+   setString(24, location, input);
+   Serial.println(location);
 }
 
 /*-------------------------------GET Functions-------------------------------------------*/
@@ -215,4 +224,8 @@ String PROM::readSSID()
 String PROM::readPWD()
 {
    return readSTRING(4); 
+}
+String PROM::readAPI()
+{
+  return readSTRING(24); 
 }

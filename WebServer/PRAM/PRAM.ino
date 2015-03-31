@@ -12,6 +12,7 @@ uint16_t MQTT_PORT = 1884;
 uint16_t CLOUD_PORT = 654;
 String _SSID= "aBCRLovs";
 String PWD = "123456";
+String API = "GPVP0E6QQVWU47LZ";
 
 void setup()
 {
@@ -27,6 +28,7 @@ void setup()
   Serial.println(prom.readCLOUDPort());
   Serial.println(prom.readSSID());
   Serial.println(prom.readPWD());
+  Serial.println(prom.readAPI());
   delay(5*1000);
   
  /* if(prom.readConfig())
@@ -35,17 +37,17 @@ void setup()
     prom.reset(1024);
     Serial.println("Done with setting");
   }*/
-  /*setMode(1);
-  setSTAIP(STA_IP);
-  setMQTTIP(MQTT_IP);
-  setCLOUDIP(CLOUD_IP);
-  setMQTTPort(MQTT_PORT);
-  setCLOUDPort(CLOUD_PORT);
-  setSSID("BCRLovs");
-  setPWD("23456");
-  setConfig();
-  
-  delay(5*1000); */
+  prom.setMode(1);
+  prom.setSTAIP(STA_IP);
+  prom.setMQTTIP(MQTT_IP);
+  prom.setCLOUDIP(CLOUD_IP);
+  prom.setMQTTPort(MQTT_PORT);
+  prom.setCLOUDPort(CLOUD_PORT);
+  prom.setSSID(_SSID);
+  prom.setPWD(PWD);
+  prom.setAPI(API);
+  prom.setConfig();
+
   delay(5*1000);
   
   Serial.println(prom.readConfig());
@@ -57,6 +59,7 @@ void setup()
   Serial.println(prom.readCLOUDPort());
   Serial.println(prom.readSSID());
   Serial.println(prom.readPWD());
+  Serial.println(prom.readAPI());
 }
 
 // Display the data stored in EEPROM

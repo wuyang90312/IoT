@@ -18,7 +18,6 @@
 class PROM {
 
 private:
-  uint8_t LENGTH;
   void setIP(uint8_t location,uint8_t IP[4]);
   String readIP(uint8_t location);
   uint16_t readPORT(uint8_t location);
@@ -41,6 +40,7 @@ public:
   void setCLOUDPort(uint16_t port);
   void setSSID(String input);
   void setPWD(String input);
+  void setAPI(String input);
   boolean readConfig();
   int readMode();
   String readSTAIP();
@@ -50,6 +50,7 @@ public:
   uint16_t readCLOUDPort();
   String readSSID();
   String readPWD();
+  String readAPI();
 };
 
 #endif

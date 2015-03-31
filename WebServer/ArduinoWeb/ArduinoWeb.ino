@@ -25,6 +25,7 @@ void setup()
   // Enable esp8266 
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
+   prom.reset(512);
   if(!prom.readConfig())
     UIweb();
     
@@ -66,8 +67,6 @@ void EEPROMconfiguration()
   Serial.println(prom.readPWD());
   Serial.println(prom.readAPI());
   
-  prom.reset(512);
-  
 }
 
 void loop()
@@ -103,9 +102,9 @@ boolean uploadUI()
   String msg,result;
   resp = "<h1> ESP8266 Web Server</h1>\n";
   resp +="<form  method=\"get\">";
-  resp += "<p>Associated AP(SSID) &nbsp; <input type=\"text\" name=\"SSID\"><br>";
-  resp += "Associated AP(PASSWORD) &nbsp; <input type=\"text\" name=\"PAWD\"><br></p>";
-  resp += "STA IP &nbsp; <input type=\"text\" name=\"STIP\"><br>";
+  resp += "<p>Associated AP(SSID) &nbsp; <input type=\"text\" name=\"SSID\"><br>";   /* Always name the name with 4 character word, easy to parse in the later step */
+  resp += "Associated AP(PASSWORD) &nbsp; <input type=\"text\" name=\"PAWD\"><br>";
+  resp += "API KEY of Thingspeak &nbsp; <input type=\"text\" name=\"APIK\"><br></p>";
  /* resp += "MQTT IP &nbsp; <input type=\"text\" name=\"MQIP\"><br>";
   resp += "CLOUD IP &nbsp; <input type=\"text\" name=\"CLIP\"><br>";
   resp += "MQTT PORT &nbsp; <input type=\"text\" name=\"MPRT\"><br>";
@@ -131,16 +130,17 @@ boolean uploadUI()
   /*deliminate the extracted information*/
   STR.StoreKey(result);
   /*****************Information stored in the URL*************************/
-  String ssid, pwd;
+  String ssid, pwd,api;
   uint8_t IP[3][4];
   uint16_t PORT[2];
   /*****************Information stored in the URL*************************/
   ssid = STR.Delimitation('&').substring(5);
   pwd = STR.Delimitation('&').substring(5);
+  api = STR.Delimitation('&').substring(5);
   //Serial.println("Password:");
  // Serial.println(pwd);
   
-  for(int i = 0; i < 3; i++)
+/*  for(int i = 0; i < 3; i++)
   {
      IP[i][0] = (uint8_t)converToInt(STR.Delimitation('.').substring(5));
     for(int j=1; j<3; j++)
@@ -154,9 +154,9 @@ boolean uploadUI()
   {
     PORT[i] = (uint16_t)converToInt(STR.Delimitation('&').substring(5));
     
-  }
+  } */
   
-  prom.Flash(1, IP[0], IP[1], IP[2], PORT[0],PORT[1], ssid, pwd);  
+  prom.Flash(1, IP[0], IP[1], IP[2], PORT[0],PORT[1], ssid, pwd, api);  
   
   String tmp = "<h1>COMPLETE</h1>\r";
   msg = "AT+CIPSEND=";

@@ -97,7 +97,7 @@ PROM::PROM()
   
 }
 
-void PROM::Flash(int Mode, uint8_t STA_IP[4], uint8_t MQTT_IP[4], uint8_t CLOUD_IP[4], uint16_t MQTT_PORT,uint16_t CLOUD_PORT,String ssid, String pwd)
+void PROM::Flash(int Mode, uint8_t STA_IP[4], uint8_t MQTT_IP[4], uint8_t CLOUD_IP[4], uint16_t MQTT_PORT,uint16_t CLOUD_PORT,String ssid, String pwd, String api)
 {
   setMode(Mode);
   setSTAIP(STA_IP);
@@ -107,6 +107,7 @@ void PROM::Flash(int Mode, uint8_t STA_IP[4], uint8_t MQTT_IP[4], uint8_t CLOUD_
   setCLOUDPort(CLOUD_PORT);
   setSSID(ssid);
   setPWD(pwd);
+  setAPI(api);
   setConfig();
 }
 

@@ -64,6 +64,7 @@ void EEPROMconfiguration()
   Serial.println(prom.readCLOUDPort());
   Serial.println(prom.readSSID());
   Serial.println(prom.readPWD());
+  Serial.println(prom.readAPI());
   
   prom.reset(512);
   

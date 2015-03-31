@@ -7,7 +7,8 @@ String resp;
 String Command;  /* Keep track of the command */
 int    Decision; /* Decide which kind of behavior of ESP should have */
 int   Count;
-
+char ChannelID; /*Channel is in scale of 0-6, No need to worry about more than 2 chars */
+ 
 int dummyData = 40;
 const String  API_KEY = "GPVP0E6QQVWU47LZ";
 StringModule STR("");
@@ -24,7 +25,49 @@ void setup()
   // Enable esp8266 
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
-  UIweb();
+  if(!prom.readConfig())
+    UIweb();
+    
+  delay(3*1000);
+  EEPROMconfiguration();
+}
+
+void EEPROMconfiguration()
+{
+ String msg;
+   
+  msg = "AT+CWMODE=";
+  msg += prom.readMode();
+  msg +="\r";
+  CommLaunch(msg, 1000, true, 0);
+  
+  CommLaunch("AT+CWMODE?", 1000, true, 0);
+  
+  msg = "AT+CWSAP=\"";
+  msg += prom.readSSID();
+  msg += "\",\"";
+  msg += prom.readPWD();
+  msg += "\",";
+  msg += "5,3\r";
+  CommLaunch(msg, 2*1000, true, 0);
+  
+  msg = "AT+CIPSTA=\"";
+  msg += prom.readSTAIP();
+  msg +="\"\r";
+  CommLaunch(msg, 2*1000, true, 0);
+  CommLaunch("AT+CIFSR", 1000, true, 0);
+  Serial.println(prom.readConfig());
+  Serial.println(prom.readMode());
+  Serial.println(prom.readSTAIP());
+  Serial.println(prom.readMQTTIP());
+  Serial.println(prom.readCLOUDIP());
+  Serial.println(prom.readMQTTPort());
+  Serial.println(prom.readCLOUDPort());
+  Serial.println(prom.readSSID());
+  Serial.println(prom.readPWD());
+  
+  prom.reset(512);
+  
 }
 
 void loop()
@@ -33,7 +76,6 @@ void loop()
 
 void UIweb()
 {
-  char ChannelID; /*Channel is in scale of 0-6, No need to worry about more than 2 chars */
   Configuration();
   
   while(true)
@@ -47,7 +89,7 @@ void UIweb()
         ChannelID = STR.Storage.charAt(STR.readPosition()); 
         STR.Storage = ""; // Clear the memory for nxt time
         CommResponse(0, 5*1000); // Wait for HTTP response to finish
-        uploadUI(ChannelID);
+        uploadUI();
         break;
       }
     }
@@ -56,7 +98,7 @@ void UIweb()
   }
 }
 
-boolean uploadUI(char ID)
+boolean uploadUI()
 {
   String msg,result;
   resp = "<h1> ESP8266 Web Server</h1>\n";
@@ -71,21 +113,33 @@ boolean uploadUI(char ID)
   resp += "<a type=\"submit\" value=\"submit\"><button>SUBMIT</button></a>";
   resp += "</form>\r";
   msg = "AT+CIPSEND=";
-  msg +=ID;
+  msg +=ChannelID;
   msg += ",";
   msg += resp.length();
   msg +="\r";
  
-  CommLaunch(msg, 2*1000, true, 0);
-  CommLaunch("resp", 2*1000, true, 0);
+  CommLaunch(msg, 1000, true, 0);
+  CommLaunch("resp",1000, true, 0);
   resp=""; // clean the string which is occupying space
   msg = "AT+CIPCLOSE=";
-  msg +=ID;
+  msg +=ChannelID;
   msg +="\r";
   CommLaunch(msg, 0, true, 0);
   
   result = Waitresponse();
-  Serial.println(result);
+  
+  String tmp = "<h1>COMPLETE</h1>\r";
+  msg = "AT+CIPSEND=";
+  msg +=ChannelID;
+  msg +=",";
+  msg += tmp.length();
+  msg += "\r";
+  CommLaunch(msg, 1000, true, 0);
+  CommLaunch(tmp, 5*1000, true, 0);
+  msg = "AT+CIPCLOSE=";
+  msg +=ChannelID;
+  msg +="\r";
+  CommLaunch(msg, 1000, true, 0);
   /*deliminate the extracted information*/
   STR.StoreKey(result);
   /*****************Information stored in the URL*************************/
@@ -113,20 +167,9 @@ boolean uploadUI(char ID)
     PORT[i] = (uint16_t)converToInt(STR.Delimitation('&').substring(5));
     
   }
-  prom.reset(512);
+  
   prom.Flash(1, IP[0], IP[1], IP[2], PORT[0],PORT[1], ssid, pwd);  
-  
-  delay(5*1000);
-  Serial.println(prom.readConfig());
-  Serial.println(prom.readMode());
-  Serial.println(prom.readSTAIP());
-  Serial.println(prom.readMQTTIP());
-  Serial.println(prom.readCLOUDIP());
-  Serial.println(prom.readMQTTPort());
-  Serial.println(prom.readCLOUDPort());
-  Serial.println(prom.readSSID());
-  Serial.println(prom.readPWD());
-  
+
   return true;
 }
 
@@ -165,12 +208,12 @@ String Waitresponse()
        STR.Storage="";
     }
   }
+  
   return result;
 }
 
 int converToInt(String input)
 {
-  //Serial.println(input.toInt());
    return input.toInt();
 }
 

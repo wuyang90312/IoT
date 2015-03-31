@@ -6,11 +6,10 @@
 String resp;
 String Command;  /* Keep track of the command */
 int    Decision; /* Decide which kind of behavior of ESP should have */
-int   Count;
 char ChannelID; /*Channel is in scale of 0-6, No need to worry about more than 2 chars */
  
 int dummyData = 40;
-const String  API_KEY = "GPVP0E6QQVWU47LZ";
+//const String  API_KEY = "GPVP0E6QQVWU47LZ";
 StringModule STR("");
 PROM prom;
 
@@ -25,52 +24,56 @@ void setup()
   // Enable esp8266 
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
-   prom.reset(512);
+  // prom.reset(512);
   if(!prom.readConfig())
     UIweb();
     
-  delay(3*1000);
+  delay(3*1000); /* Give a time break b/t two critical commands */
   EEPROMconfiguration();
+  ESPTCPconnection();
+}
+
+void ESPTCPconnection()
+{
+  String URL;
+  
+  URL = "AT+CIPSTART=\"TCP\",\"184.106.153.149\",80";
+  
+  //CommLaunch("AT+CIPCLOSE=1", 2*1000, true, 2);
+  CommLaunch(URL, 8*1000, true, 2);
+   
+  CommLaunch("AT+CIPSTATUS\r", 2*1000, true, 0); 
 }
 
 void EEPROMconfiguration()
 {
- String msg;
+  String msg;
+ 
+  CommLaunch("AT+RST", 8*1000, true, 0);
    
   msg = "AT+CWMODE=";
   msg += prom.readMode();
   msg +="\r";
   CommLaunch(msg, 1000, true, 0);
   
-  CommLaunch("AT+CWMODE?", 1000, true, 0);
-  
   msg = "AT+CWJAP=\"";
   msg += prom.readSSID();
   msg += "\",\"";
   msg += prom.readPWD();
   msg += "\"\r";
-  CommLaunch(msg, 8*1000, true, 0);
+  CommLaunch(msg, 8*1000, true, 2);
   
   msg = "AT+CIPSTA=\"";
   msg += prom.readSTAIP();
   msg +="\"\r";
   CommLaunch(msg, 2*1000, true, 0);
   CommLaunch("AT+CIFSR", 1000, true, 0);
-  Serial.println(prom.readConfig());
-  Serial.println(prom.readMode());
-  Serial.println(prom.readSTAIP());
-  Serial.println(prom.readMQTTIP());
-  Serial.println(prom.readCLOUDIP());
-  Serial.println(prom.readMQTTPort());
-  Serial.println(prom.readCLOUDPort());
-  Serial.println(prom.readSSID());
-  Serial.println(prom.readPWD());
-  Serial.println(prom.readAPI());
-  
 }
 
 void loop()
 {
+  
+  
 }
 
 void UIweb()
@@ -104,7 +107,8 @@ boolean uploadUI()
   resp +="<form  method=\"get\">";
   resp += "<p>Associated AP(SSID) &nbsp; <input type=\"text\" name=\"SSID\"><br>";   /* Always name the name with 4 character word, easy to parse in the later step */
   resp += "Associated AP(PASSWORD) &nbsp; <input type=\"text\" name=\"PAWD\"><br>";
-  resp += "API KEY of Thingspeak &nbsp; <input type=\"text\" name=\"APIK\"><br></p>";
+  resp += "API KEY of Thingspeak &nbsp; <input type=\"text\" name=\"APIK\"><br>";
+  resp += "STATION IP &nbsp; <input type=\"text\" name=\"STIP\"><br></p>";
  /* resp += "MQTT IP &nbsp; <input type=\"text\" name=\"MQIP\"><br>";
   resp += "CLOUD IP &nbsp; <input type=\"text\" name=\"CLIP\"><br>";
   resp += "MQTT PORT &nbsp; <input type=\"text\" name=\"MPRT\"><br>";
@@ -137,8 +141,12 @@ boolean uploadUI()
   ssid = STR.Delimitation('&').substring(5);
   pwd = STR.Delimitation('&').substring(5);
   api = STR.Delimitation('&').substring(5);
-  //Serial.println("Password:");
- // Serial.println(pwd);
+  IP[0][0] = (uint8_t)converToInt(STR.Delimitation('.').substring(5));
+  for(int j=1; j<3; j++)
+  {
+    IP[0][j] = (uint8_t)converToInt(STR.Delimitation('.'));
+  }
+  IP[0][3] = (uint8_t)converToInt(STR.Delimitation('&'));
   
 /*  for(int i = 0; i < 3; i++)
   {
@@ -230,10 +238,20 @@ void CommLaunch(String cmd,unsigned int duration, boolean res, int keyword)
 {
   if(cmd.equals("resp"))
     Serial1.println(resp);
-  Serial1.println(cmd);    //send command to ESP8266
+    
+  for(int Loop = 0; Loop <5 ; Loop ++)
+  {
+    STR.Storage = ""; /* clean every times after 1 iteration of for loop */
+    Serial1.println(cmd);    //send command to ESP8266
   
-  if(res)
+   if(res)
     CommResponse( keyword, duration);
+
+   if(keyword==2 && !STR.Contains("OK"))
+     Loop ++;
+   else
+     Loop = 5; 
+  }
 }
 
 void CommResponse(int keyword, unsigned int duration)
@@ -247,7 +265,7 @@ void CommResponse(int keyword, unsigned int duration)
     }
 
     if(tmp.length() > 0) {
-      if(keyword==1)
+      if(keyword==1 || keyword == 2)
       {
         STR.Storage += tmp; // if the keyword is triggered, copy the string
       }

@@ -26,8 +26,8 @@ BYTE 6: LENGTH BYTEES OF PWD=> give the length of PWD.
 
 ** SSID and PWD here is the one to associate with.
 
-BYTE 7: AP/STA MODE BYTE => 0(STA)/1(AP)/2(DUAL MODE)
-BYTE 8-11: STA IP => The IP of ESP itself as a station. For instance, [192] [168] [2] [102]
+BYTE 7: AP/STA MODE BYTE => 0(STA)/1(AP)/2(DUAL MODE)     (ESP8266 can store)
+BYTE 8-11: STA IP => The IP of ESP itself as a station. For instance, [192] [168] [2] [102]      (ESP8266 can store)
 BYTE 12-15: MQTT IP => The IP of MQTT broker
 BYTE 16-17: MQTT PORT NUMBER => byte 16 has to LSB byte.
 BYTE 18-21: CLOUD IP => The IP of cloud

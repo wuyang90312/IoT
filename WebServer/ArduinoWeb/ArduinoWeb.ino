@@ -75,27 +75,19 @@ void EEPROMconfiguration()
 
 void loop()
 {
- // int limit = 0;
+  long time = millis();
   ESPTCPconnection();
-  dummy+=5;
+  dummy= (dummy + 5)%100;
   ESPUpload(dummy);
   
   if(!STR.Contains("CLOSED"))
   {
-    //CommLaunch("AT+CIPCLOSE=0\r", 8*1000, true, 1);
-    
-  //  while(!STR.Contains("CLOSED"))
-  //  {
-      /*Serial.println(STR.Storage);
-      CommResponse(1, 100);
-      
-      if(limit >= 3000)*/
-        CommLaunch("AT+RST\r", 8*1000, true, 1);
-      
-      //limit ++;
-  //  }
+        EEPROMconfiguration();
   }
-  delay(30*1000);
+  
+  time = 30*1000 + time - millis();
+  if(time > 0)
+    delay(time);
 }
 
 void ESPTCPsend(int length)

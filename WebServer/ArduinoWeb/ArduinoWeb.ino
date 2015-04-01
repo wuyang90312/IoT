@@ -30,7 +30,7 @@ void setup()
     
   delay(3*1000); /* Give a time break b/t two critical commands */
   EEPROMconfiguration();
-  ESPTCPconnection();
+  //ESPTCPconnection();
 }
 
 void ESPTCPconnection()
@@ -72,7 +72,36 @@ void EEPROMconfiguration()
 
 void loop()
 {
+  ESPTCPconnection();
+  ESPUpload(125);
   
+  if(!STR.Contains("CLOSE"))
+  {
+    Serial.println("--------------------");
+    CommLaunch("AT+CIPCLOSE\r", 2*1000, true, 0);
+  }
+  delay(30*1000);
+}
+
+void ESPTCPsend(int length)
+{
+  String message = "AT+CIPSEND="; 
+  message+=length;
+  CommLaunch(message, 2*1000, true, 0); 
+}
+
+void ESPUpload(int input)
+{
+  String content;
+  int SIZE;
+  content = "GET /update?key=";
+  content += prom.readAPI();
+  content += "&field1=";
+  content += input;
+  SIZE = content.length()+1;
+  
+  ESPTCPsend(SIZE);
+  CommLaunch(content, 2*1000, true, 1); 
   
 }
 

@@ -29,7 +29,7 @@ private:
   
 public:
   PROM();
-  void Flash(int Mode, uint8_t STA_IP[4], uint8_t MQTT_IP[4], uint8_t CLOUD_IP[4], uint16_t MQTT_PORT,uint16_t CLOUD_PORT,String ssid, String pwd, String api);
+  void Flash(int Mode, uint8_t STA_IP[4], uint8_t MQTT_IP[4], uint8_t CLOUD_IP[4], uint16_t MQTT_PORT,uint16_t CLOUD_PORT,String ssid, String pwd, String api, uint16_t time);
   void reset(int Length);
   void setConfig();
   void setMode(uint8_t input);
@@ -41,6 +41,8 @@ public:
   void setSSID(String input);
   void setPWD(String input);
   void setAPI(String input);
+  void setFREQUENCY(uint16_t time);
+/*-------------------------------------------------*/
   boolean readConfig();
   int readMode();
   String readSTAIP();
@@ -51,6 +53,7 @@ public:
   String readSSID();
   String readPWD();
   String readAPI();
+  uint16_t readFREQUENCY();
 };
 
 #endif

@@ -7,10 +7,8 @@ String resp;
 String Command;  /* Keep track of the command */
 int    Decision; /* Decide which kind of behavior of ESP should have */
 char ChannelID; /*Channel is in scale of 0-6, No need to worry about more than 2 chars */
-int dummy =25;
+uint8_t dummy =25; 
  
-int dummyData = 40;
-//const String  API_KEY = "GPVP0E6QQVWU47LZ";
 StringModule STR("");
 PROM prom;
 
@@ -25,13 +23,12 @@ void setup()
   // Enable esp8266 
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
-  // prom.reset(512);
+   prom.reset(512);
   if(!prom.readConfig())
     UIweb();
-    
+  
   delay(3*1000); /* Give a time break b/t two critical commands */
   EEPROMconfiguration();
-  //ESPTCPconnection();
 }
 
 void ESPTCPconnection()
@@ -70,7 +67,7 @@ void EEPROMconfiguration()
   msg += prom.readSTAIP();
   msg +="\"\r";
   CommLaunch(msg, 2*1000, true, 0);
-  CommLaunch("AT+CIFSR", 1000, true, 0);
+ // CommLaunch("AT+CIFSR", 1000, true, 0);
 }
 
 void loop()
@@ -85,7 +82,7 @@ void loop()
         EEPROMconfiguration();
   }
   
-  time = 30*1000 + time - millis();
+  time = prom.readFREQUENCY()*1000 + time - millis();
   if(time > 0)
     delay(time);
 }
@@ -106,9 +103,9 @@ void ESPUpload(int input)
   content += "&field1=";
   content += input;
   SIZE = content.length()+1;
-  
+
   ESPTCPsend(SIZE);
-  CommLaunch(content, 2*1000, true, 1); 
+  CommLaunch(content, 4*1000, true, 1); 
   
 }
 
@@ -144,11 +141,8 @@ boolean uploadUI()
   resp += "<p>Associated AP(SSID) &nbsp; <input type=\"text\" name=\"SSID\"><br>";   /* Always name the name with 4 character word, easy to parse in the later step */
   resp += "Associated AP(PASSWORD) &nbsp; <input type=\"text\" name=\"PAWD\"><br>";
   resp += "API KEY of Thingspeak &nbsp; <input type=\"text\" name=\"APIK\"><br>";
-  resp += "STATION IP &nbsp; <input type=\"text\" name=\"STIP\"><br></p>";
- /* resp += "MQTT IP &nbsp; <input type=\"text\" name=\"MQIP\"><br>";
-  resp += "CLOUD IP &nbsp; <input type=\"text\" name=\"CLIP\"><br>";
-  resp += "MQTT PORT &nbsp; <input type=\"text\" name=\"MPRT\"><br>";
-  resp += "CLOUD PORT &nbsp; <input type=\"text\" name=\"CPRT\"><br></p>";*/
+  resp += "STATION IP &nbsp; <input type=\"text\" name=\"STIP\"><br>";
+  resp += "UPDATE FREQUENCY(Sec) &nbsp;<input type=\"text\" name=\"TIME\"><br></p>";
   resp += "<a type=\"submit\" value=\"submit\"><button>SUBMIT</button></a>";
   resp += "</form>\r";
   msg = "AT+CIPSEND=";
@@ -172,7 +166,7 @@ boolean uploadUI()
   /*****************Information stored in the URL*************************/
   String ssid, pwd,api;
   uint8_t IP[3][4];
-  uint16_t PORT[2];
+  uint16_t PORT[2], duration;
   /*****************Information stored in the URL*************************/
   ssid = STR.Delimitation('&').substring(5);
   pwd = STR.Delimitation('&').substring(5);
@@ -183,24 +177,13 @@ boolean uploadUI()
     IP[0][j] = (uint8_t)converToInt(STR.Delimitation('.'));
   }
   IP[0][3] = (uint8_t)converToInt(STR.Delimitation('&'));
+  duration = (uint16_t) converToInt(STR.Delimitation('&').substring(5));
   
-/*  for(int i = 0; i < 3; i++)
-  {
-     IP[i][0] = (uint8_t)converToInt(STR.Delimitation('.').substring(5));
-    for(int j=1; j<3; j++)
-    {
-      IP[i][j] = (uint8_t)converToInt(STR.Delimitation('.'));
-    }
-    IP[i][3] = (uint8_t)converToInt(STR.Delimitation('&'));
-  }
+  prom.Flash(1, IP[0], IP[1], IP[2], PORT[0],PORT[1], ssid, pwd, api, duration);  
   
-  for(int i = 0; i < 2; i++)
-  {
-    PORT[i] = (uint16_t)converToInt(STR.Delimitation('&').substring(5));
-    
-  } */
-  
-  prom.Flash(1, IP[0], IP[1], IP[2], PORT[0],PORT[1], ssid, pwd, api);  
+  Serial.println("....................................");
+  Serial.println(prom.readAPI());
+  Serial.println("....................................");
   
   String tmp = "<h1>COMPLETE</h1>\r";
   msg = "AT+CIPSEND=";

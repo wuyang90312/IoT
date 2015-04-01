@@ -43,7 +43,7 @@ uint16_t PROM::readPORT(uint8_t location)
   return tmp;
 }
 
-void PROM::setPORT(uint8_t location, uint16_t port)
+void PROM::setPORT(uint8_t location, uint16_t port) /* set uint16_t */
 {
   store16BIT(location, port);
 }
@@ -97,7 +97,7 @@ PROM::PROM()
   
 }
 
-void PROM::Flash(int Mode, uint8_t STA_IP[4], uint8_t MQTT_IP[4], uint8_t CLOUD_IP[4], uint16_t MQTT_PORT,uint16_t CLOUD_PORT,String ssid, String pwd, String api)
+void PROM::Flash(int Mode, uint8_t STA_IP[4], uint8_t MQTT_IP[4], uint8_t CLOUD_IP[4], uint16_t MQTT_PORT,uint16_t CLOUD_PORT,String ssid, String pwd, String api, uint16_t time)
 {
   setMode(Mode);
   setSTAIP(STA_IP);
@@ -108,6 +108,7 @@ void PROM::Flash(int Mode, uint8_t STA_IP[4], uint8_t MQTT_IP[4], uint8_t CLOUD_
   setSSID(ssid);
   setPWD(pwd);
   setAPI(api);
+  setFREQUENCY(time);
   setConfig();
 }
 
@@ -172,6 +173,11 @@ void PROM::setAPI(String input)
    Serial.println(location);
 }
 
+void PROM::setFREQUENCY(uint16_t time)
+{
+  setPORT(27, time);
+}
+
 /*-------------------------------GET Functions-------------------------------------------*/
 
 boolean PROM::readConfig()
@@ -229,4 +235,8 @@ String PROM::readPWD()
 String PROM::readAPI()
 {
   return readSTRING(24); 
+}
+uint16_t PROM::readFREQUENCY()
+{
+  return readPORT(27); 
 }

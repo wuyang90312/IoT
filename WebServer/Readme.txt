@@ -36,6 +36,8 @@ BYTE 22-23: CLOUD PORT NUMBER => byte 16 has to LSB byte.
 BYTE 24-25: POSITION BYTES OF API KEY => BYTE 1 contains the LSB 8 bits, BYTE 2 contains the rest of MSB bits. In a 1KB memory, they can concatenate together to a 10 bit number to indicate the initial position of API KEY.
 BYTE 26: LENGTH BYTEES OF API KEY => give the length of API KEY.
 
+BYTE 27-28: UPDATE FREQUENCY => byte 27 has to LSB byte.
+
 For now,
 BYTE 124-(123+SIZE OF X): SSID => each byte is an ASCII character
 BYTE A-(A+SIZE OF Y-1) [(124+SIZE OF X) - (123+SIZE OF X + SIZE OF Y)]: password

@@ -17,7 +17,7 @@ String API = "GPVP0E6QQVWU47LZ";
 void setup()
 {
   Serial.begin(115200);
-  
+   delay(5*1000);
   PROM prom;
   Serial.println(prom.readConfig());
   Serial.println(prom.readMode());
@@ -29,6 +29,7 @@ void setup()
   Serial.println(prom.readSSID());
   Serial.println(prom.readPWD());
   Serial.println(prom.readAPI());
+  Serial.println(prom.readFREQUENCY());
   delay(5*1000);
   
  /* if(prom.readConfig())
@@ -37,7 +38,7 @@ void setup()
     prom.reset(1024);
     Serial.println("Done with setting");
   }*/
-  prom.setMode(1);
+ /* prom.setMode(1);
   prom.setSTAIP(STA_IP);
   prom.setMQTTIP(MQTT_IP);
   prom.setCLOUDIP(CLOUD_IP);
@@ -46,7 +47,8 @@ void setup()
   prom.setSSID(_SSID);
   prom.setPWD(PWD);
   prom.setAPI(API);
-  prom.setConfig();
+  prom.setFREQUENCY(60);
+  prom.setConfig();*/
 
   delay(5*1000);
   
@@ -60,6 +62,7 @@ void setup()
   Serial.println(prom.readSSID());
   Serial.println(prom.readPWD());
   Serial.println(prom.readAPI());
+  Serial.println(prom.readFREQUENCY());
 }
 
 // Display the data stored in EEPROM

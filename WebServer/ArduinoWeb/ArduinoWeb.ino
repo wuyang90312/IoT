@@ -7,6 +7,7 @@ String resp;
 String Command;  /* Keep track of the command */
 int    Decision; /* Decide which kind of behavior of ESP should have */
 char ChannelID; /*Channel is in scale of 0-6, No need to worry about more than 2 chars */
+int dummy =25;
  
 int dummyData = 40;
 //const String  API_KEY = "GPVP0E6QQVWU47LZ";
@@ -37,24 +38,26 @@ void ESPTCPconnection()
 {
   String URL;
   
-  URL = "AT+CIPSTART=\"TCP\",\"184.106.153.149\",80";
-  
-  //CommLaunch("AT+CIPCLOSE=1", 2*1000, true, 2);
+  URL = "AT+CIPSTART=0,\"TCP\",\"184.106.153.149\",80";
   CommLaunch(URL, 8*1000, true, 2);
    
-  CommLaunch("AT+CIPSTATUS\r", 2*1000, true, 0); 
+  //CommLaunch("AT+CIPSTATUS\r", 2*1000, true, 0); 
 }
 
 void EEPROMconfiguration()
 {
   String msg;
  
-  CommLaunch("AT+RST", 8*1000, true, 0);
+  CommLaunch("AT+RST\r", 8*1000, true, 0);
+   
+  CommLaunch("AT+CIPSTATUS\r", 2*1000, true, 0); 
    
   msg = "AT+CWMODE=";
   msg += prom.readMode();
   msg +="\r";
   CommLaunch(msg, 1000, true, 0);
+  
+  CommLaunch("AT+CIPMUX=1\r", 1000, true, 0);
   
   msg = "AT+CWJAP=\"";
   msg += prom.readSSID();
@@ -72,20 +75,32 @@ void EEPROMconfiguration()
 
 void loop()
 {
+ // int limit = 0;
   ESPTCPconnection();
-  ESPUpload(125);
+  dummy+=5;
+  ESPUpload(dummy);
   
-  if(!STR.Contains("CLOSE"))
+  if(!STR.Contains("CLOSED"))
   {
-    Serial.println("--------------------");
-    CommLaunch("AT+CIPCLOSE\r", 2*1000, true, 0);
+    //CommLaunch("AT+CIPCLOSE=0\r", 8*1000, true, 1);
+    
+  //  while(!STR.Contains("CLOSED"))
+  //  {
+      /*Serial.println(STR.Storage);
+      CommResponse(1, 100);
+      
+      if(limit >= 3000)*/
+        CommLaunch("AT+RST\r", 8*1000, true, 1);
+      
+      //limit ++;
+  //  }
   }
   delay(30*1000);
 }
 
 void ESPTCPsend(int length)
 {
-  String message = "AT+CIPSEND="; 
+  String message = "AT+CIPSEND=0,"; 
   message+=length;
   CommLaunch(message, 2*1000, true, 0); 
 }

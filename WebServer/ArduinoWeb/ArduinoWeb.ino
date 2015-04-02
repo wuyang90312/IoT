@@ -1,13 +1,16 @@
 #include <EEPROM.h>
+#include <Wire.h>
 #include "PROM.h"
 #include "StringModule.h"
+
+
 
 /* 1 KB (ATmega32u4)*/
 String resp;
 String Command;  /* Keep track of the command */
 int    Decision; /* Decide which kind of behavior of ESP should have */
 char ChannelID; /*Channel is in scale of 0-6, No need to worry about more than 2 chars */
-uint8_t dummy =25; 
+int tmp102Address = 0x48; /* Base address of thermometer */
  
 StringModule STR("");
 PROM prom;
@@ -23,7 +26,7 @@ void setup()
   // Enable esp8266 
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
-   prom.reset(512);
+   //prom.reset(512);
   if(!prom.readConfig())
     UIweb();
   
@@ -73,9 +76,12 @@ void EEPROMconfiguration()
 void loop()
 {
   long time = millis();
+  float celsius = getTemperature();
+  Serial.print("Celsius: ");
+  Serial.println(celsius);
+  
   ESPTCPconnection();
-  dummy= (dummy + 5)%100;
-  ESPUpload(dummy);
+  ESPUpload(celsius);
   
   if(!STR.Contains("CLOSED"))
   {
@@ -94,7 +100,7 @@ void ESPTCPsend(int length)
   CommLaunch(message, 2*1000, true, 0); 
 }
 
-void ESPUpload(int input)
+void ESPUpload(float input)
 {
   String content;
   int SIZE;
@@ -295,3 +301,16 @@ void CommResponse(int keyword, unsigned int duration)
   }
 }
 
+
+float getTemperature(){
+  Wire.requestFrom(tmp102Address,2); 
+
+  byte MSB = Wire.read();
+  byte LSB = Wire.read();
+
+  //it's a 12bit int, using two's compliment for negative
+  int TemperatureSum = ((MSB << 8) | LSB) >> 4; 
+
+  float celsius = TemperatureSum*0.0625;
+  return celsius;
+}

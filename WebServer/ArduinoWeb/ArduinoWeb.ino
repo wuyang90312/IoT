@@ -26,7 +26,7 @@ void setup()
   // Enable esp8266 
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
-   //prom.reset(512);
+   prom.reset(512);
   if(!prom.readConfig())
     UIweb();
   
@@ -77,8 +77,6 @@ void loop()
 {
   long time = millis();
   float celsius = getTemperature();
-  Serial.print("Celsius: ");
-  Serial.println(celsius);
   
   ESPTCPconnection();
   ESPUpload(celsius);
@@ -142,13 +140,13 @@ void UIweb()
 boolean uploadUI()
 {
   String msg,result;
-  resp = "<h1> ESP8266 Web Server</h1>\n";
+  resp = "<h1> CONFIGURATION </h1>\n";
   resp +="<form  method=\"get\">";
-  resp += "<p>Associated AP(SSID) &nbsp; <input type=\"text\" name=\"SSID\"><br>";   /* Always name the name with 4 character word, easy to parse in the later step */
-  resp += "Associated AP(PASSWORD) &nbsp; <input type=\"text\" name=\"PAWD\"><br>";
-  resp += "API KEY of Thingspeak &nbsp; <input type=\"text\" name=\"APIK\"><br>";
+  resp += "<p>SSID &nbsp; <input type=\"text\" name=\"SSID\"><br>";   /* Always name the name with 4 character word, easy to parse in the later step */
+  resp += "PASSWORD &nbsp; <input type=\"text\" name=\"PAWD\"><br>";
+  resp += "API KEY &nbsp; <input type=\"text\" name=\"APIK\"><br>";
   resp += "STATION IP &nbsp; <input type=\"text\" name=\"STIP\"><br>";
-  resp += "UPDATE FREQUENCY(Sec) &nbsp;<input type=\"text\" name=\"TIME\"><br></p>";
+  resp += "Update Duration(Sec) &nbsp;<input type=\"text\" name=\"TIME\"><br></p>";
   resp += "<a type=\"submit\" value=\"submit\"><button>SUBMIT</button></a>";
   resp += "</form>\r";
   msg = "AT+CIPSEND=";
@@ -189,7 +187,6 @@ boolean uploadUI()
   
   Serial.println("....................................");
   Serial.println(prom.readAPI());
-  Serial.println("....................................");
   
   String tmp = "<h1>COMPLETE</h1>\r";
   msg = "AT+CIPSEND=";
@@ -199,6 +196,7 @@ boolean uploadUI()
   msg += "\r";
   CommLaunch(msg, 1000, true, 0);
   CommLaunch(tmp, 5*1000, true, 0);
+  tmp="";
   msg = "AT+CIPCLOSE=";
   msg +=ChannelID;
   msg +="\r";
@@ -252,11 +250,11 @@ int converToInt(String input)
 
 void Configuration()
 {
-  CommLaunch("AT+RST\r", 2*1000, true, 0);
-  CommLaunch("AT+CWMODE=2\r", 1000, true, 0);
-  CommLaunch("AT+CIPMUX=1\r", 2*1000, true, 0);
-  CommLaunch("AT+CIPSERVER=1,80\r", 2*1000, true, 0);
-  CommLaunch("AT+CWSAP=\"AI-THINKER\",\"\",5,0\r", 5*1000, true, 0);
+  CommLaunch(F("AT+RST\r"), 2*1000, true, 0);
+  CommLaunch(F("AT+CWMODE=2\r"), 1000, true, 0);
+  CommLaunch(F("AT+CIPMUX=1\r"), 2*1000, true, 0);
+  CommLaunch(F("AT+CIPSERVER=1,80\r"), 2*1000, true, 0);
+  CommLaunch(F("AT+CWSAP=\"AI-THINKER\",\"1234567890\",5,4\r"), 5*1000, true, 0);
 }
 
 void CommLaunch(String cmd,unsigned int duration, boolean res, int keyword)

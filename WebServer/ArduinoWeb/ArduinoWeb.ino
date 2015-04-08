@@ -26,9 +26,8 @@ void setup()
   // Enable esp8266 
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
-   prom.reset(512);
-  if(!prom.readConfig())
-    UIweb();
+  
+  UIweb();
   
   delay(3*1000); /* Give a time break b/t two critical commands */
   EEPROMconfiguration();
@@ -115,8 +114,10 @@ void ESPUpload(float input)
 
 void UIweb()
 {
+  long deadline = 600000+millis(); /* If the EEPROM is already configured, wait for 10 min */
+  //Serial.println(deadline);
   Configuration();
-  
+
   while(true)
   {
     CommResponse(1, 100); // Wait for the HTTP access
@@ -124,7 +125,7 @@ void UIweb()
     {
       if(STR.Contains("+IPD,"))
       {
-        Serial.println(F("------------------GET----------------------"));
+       // Serial.println(F("------------------GET----------------------"));
         ChannelID = STR.Storage.charAt(STR.readPosition()); 
         STR.Storage = ""; // Clear the memory for nxt time
         CommResponse(0, 5*1000); // Wait for HTTP response to finish
@@ -134,6 +135,13 @@ void UIweb()
     }
 
     STR.Storage = "";// Clear the memory for nxt time
+    if(millis() > deadline && prom.readConfig())
+    {
+      //Serial.println(deadline);
+      //Serial.println(millis());
+      //Serial.println("Wait for 10 min");
+      break;
+    }
   }
 }
 

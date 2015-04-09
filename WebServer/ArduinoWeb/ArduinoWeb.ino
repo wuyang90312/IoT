@@ -18,9 +18,9 @@ PROM prom;
 void setup()
 {
   Serial.begin(115200);    // Arduino serial Monitor
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for Leonardo only
-  }
+ // while (!Serial) {
+ //   ; // wait for serial port to connect. Needed for Leonardo only
+ // }
   Serial1.begin(9600);   // The ESP8826 has a baud rate of 115200
   
   // Enable esp8266 
@@ -65,10 +65,10 @@ void EEPROMconfiguration()
   msg += "\"\r";
   CommLaunch(msg, 8*1000, true, 2);
   
-  msg = "AT+CIPSTA=\"";
+ /* msg = "AT+CIPSTA=\"";
   msg += prom.readSTAIP();
   msg +="\"\r";
-  CommLaunch(msg, 2*1000, true, 0);
+  CommLaunch(msg, 2*1000, true, 0);*/
  // CommLaunch("AT+CIFSR", 1000, true, 0);
 }
 
@@ -153,7 +153,7 @@ boolean uploadUI()
   resp += "<p>SSID &nbsp; <input type=\"text\" name=\"SSID\"><br>";   /* Always name the name with 4 character word, easy to parse in the later step */
   resp += "PASSWORD &nbsp; <input type=\"text\" name=\"PAWD\"><br>";
   resp += "API KEY &nbsp; <input type=\"text\" name=\"APIK\"><br>";
-  resp += "STATION IP &nbsp; <input type=\"text\" name=\"STIP\"><br>";
+ // resp += "STATION IP &nbsp; <input type=\"text\" name=\"STIP\"><br>";
   resp += "Update Duration(Sec) &nbsp;<input type=\"text\" name=\"TIME\"><br></p>";
   resp += "<a type=\"submit\" value=\"submit\"><button>SUBMIT</button></a>";
   resp += "</form>\r";
@@ -183,12 +183,12 @@ boolean uploadUI()
   ssid = STR.Delimitation('&').substring(5);
   pwd = STR.Delimitation('&').substring(5);
   api = STR.Delimitation('&').substring(5);
-  IP[0][0] = (uint8_t)converToInt(STR.Delimitation('.').substring(5));
+/*  IP[0][0] = (uint8_t)converToInt(STR.Delimitation('.').substring(5));
   for(int j=1; j<3; j++)
   {
     IP[0][j] = (uint8_t)converToInt(STR.Delimitation('.'));
   }
-  IP[0][3] = (uint8_t)converToInt(STR.Delimitation('&'));
+  IP[0][3] = (uint8_t)converToInt(STR.Delimitation('&'));*/
   duration = (uint16_t) converToInt(STR.Delimitation('&').substring(5));
   
   prom.Flash(1, IP[0], IP[1], IP[2], PORT[0],PORT[1], ssid, pwd, api, duration);  

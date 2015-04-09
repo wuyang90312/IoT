@@ -9,8 +9,9 @@
 String resp;
 String Command;  /* Keep track of the command */
 int    Decision; /* Decide which kind of behavior of ESP should have */
-char ChannelID; /*Channel is in scale of 0-6, No need to worry about more than 2 chars */
-int tmp102Address = 0x48; /* Base address of thermometer */
+char   ChannelID; /*Channel is in scale of 0-6, No need to worry about more than 2 chars */
+int    tmp102Address = 0x48; /* Base address of thermometer */
+bool   reset = false;
  
 StringModule STR("");
 PROM prom;
@@ -77,11 +78,18 @@ void loop()
   long time = millis();
   float celsius = getTemperature();
   
+  if(reset)
+  {
+   celsius =0;
+   reset = false; 
+  }
+  
   ESPTCPconnection();
   ESPUpload(celsius);
   
   if(!STR.Contains("CLOSED"))
   {
+      reset = true;
         EEPROMconfiguration();
   }
   
@@ -108,7 +116,7 @@ void ESPUpload(float input)
   SIZE = content.length()+1;
 
   ESPTCPsend(SIZE);
-  CommLaunch(content, 4*1000, true, 1); 
+  CommLaunch(content, 8*1000, true, 1); 
   
 }
 

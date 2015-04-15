@@ -26,6 +26,7 @@ typedef enum
   CMD_RESET,
   CMD_IS_READY,
   CMD_WIFI_CONNECT,
+  CMD_WIFI_AP_CONFIG, /* Add this token for AP configuration */
   CMD_MQTT_SETUP,
   CMD_MQTT_CONNECT,
   CMD_MQTT_DISCONNECT,
@@ -101,6 +102,7 @@ public:
   boolean is_return;
 
   void wifiConnect(const char* ssid, const char* password);
+  void wifiAPconfig(const char* ssid, const char* password); /* This method is written to change the SSID/PASSWORD of ESP at AP mode */
   void process();
   uint16_t request(uint16_t cmd, uint32_t callback, uint32_t _return, uint16_t argc);
   uint16_t request(uint16_t crc_in, uint8_t* data, uint16_t len);

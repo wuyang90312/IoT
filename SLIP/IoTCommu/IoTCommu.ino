@@ -83,8 +83,9 @@ void setup() {
   esp.reset();
   delay(500);
   while(!esp.ready());
+  esp.wifiAPconfig("AI-THINKER-SLIP","23456789");
 
-  Serial.println("ARDUINO: setup rest client");
+ /* Serial.println("ARDUINO: setup rest client");
   if(!rest.begin("api.thingspeak.com")) {
     Serial.println("ARDUINO: failed to setup rest client");
     while(1);
@@ -94,10 +95,10 @@ void setup() {
   if(!mqtt.begin("DVES_duino", "", "", 120, true)) {
     Serial.println("ARDUINO: fail to setup mqtt");
     while(1);
-  }
+  }*/
   
   /*setup mqtt events */
-  mqtt.connectedCb.attach(&mqttConnected);
+/*  mqtt.connectedCb.attach(&mqttConnected);
   mqtt.disconnectedCb.attach(&mqttDisconnected);
   mqtt.publishedCb.attach(&mqttPublished);
   mqtt.dataCb.attach(&mqttData);
@@ -107,16 +108,16 @@ void setup() {
 
   Serial.println("SCHEDULER: Install the method into scheduler");
   sch.addThread(200, &MQTTsend);
-  sch.addThread(600, &RESTupdate);
+  sch.addThread(600, &RESTupdate);*/
   /*we want to make MQTTlisten as a background thread, so put it in the highest index*/
-  sch.addThread(3, &MQTTlisten); 
+//  sch.addThread(3, &MQTTlisten); 
 
   /*setup wifi*/
-  Serial.println("ARDUINO: setup wifi");
+ /* Serial.println("ARDUINO: setup wifi");
   esp.wifiCb.attach(&wifiCb);
 
   esp.wifiConnect("BCRLovs","23456");
-  Serial.println("ARDUINO: system started");
+  Serial.println("ARDUINO: system started"); */
   
   
 }

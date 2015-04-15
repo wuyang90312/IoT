@@ -114,6 +114,17 @@ void ESP::wifiConnect(const char* ssid, const char* password)
   crc = request(crc,(uint8_t*)password, strlen(password));
   request(crc);
 }
+
+/* This method is written to change the SSID/PASSWORD of ESP at AP mode */
+void ESP::wifiAPconfig(const char* ssid, const char* password)
+{
+  uint16_t crc;
+  crc = request(CMD_WIFI_AP_CONFIG, 0, 0, 2); /* Require no call back function */
+  crc = request(crc,(uint8_t*)ssid, strlen(ssid));
+  crc = request(crc,(uint8_t*)password, strlen(password));
+  request(crc);
+}
+
 void ESP::write(uint8_t data)
 {
   switch(data){

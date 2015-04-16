@@ -8,11 +8,9 @@
 #include "user_interface.h"
 #include "osapi.h"
 #include "espconn.h"
-//#include "os_type.h"
 #include "mem.h"
 
 #include "user_config.h"
-//#include "cmd.h"
 #include "debug.h"
 
 static ETSTimer WiFiLinker;

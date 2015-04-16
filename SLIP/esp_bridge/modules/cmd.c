@@ -46,7 +46,7 @@ const CMD_LIST commands[] =
 	{CMD_REST_REQUEST, REST_Request},
 	{CMD_REST_SETHEADER, REST_SetHeader},
 
-	{CMD_TCP_SERVER, ESP_SetupIpServer}
+	{CMD_TCP_SERVER, ESP_SetupIpServer},
 	{CMD_NULL, NULL}
 };
 

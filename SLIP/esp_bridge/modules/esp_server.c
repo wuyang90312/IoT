@@ -115,7 +115,7 @@ ESP_TcpServerListen(void *arg)
 uint32_t ICACHE_FLASH_ATTR
 ESP_SetupIpServer()
 {
-	INFO("Start a TCP server");
+	INFO("Start a TCP server\r\n");
 	pTcpServer = (struct espconn *)os_zalloc(sizeof(struct espconn));
 	if (pTcpServer == NULL)
 	{
@@ -130,5 +130,5 @@ ESP_SetupIpServer()
 	espconn_accept(pTcpServer);
 	espconn_regist_time(pTcpServer, server_timeover, 0);
 
-	return 1;
+	return 0;
 }

@@ -109,7 +109,7 @@ public:
   uint16_t request(uint16_t crc_in, uint8_t* data, uint16_t len);
   uint16_t request(uint16_t crc);
   void reset();
-  void tcp_server()
+  void tcp_server();
   boolean ready();
   void enable();
   void disable();

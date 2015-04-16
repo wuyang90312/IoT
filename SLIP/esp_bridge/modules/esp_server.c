@@ -17,6 +17,7 @@ static linkConType pLink;
 LOCAL void ICACHE_FLASH_ATTR
 ESP_TcpClient_Recv(void *arg, char *pdata, unsigned short len)
 {
+	char* msg;
 	struct espconn *pespconn = (struct espconn *)arg;
 	linkConType *linkTemp = (linkConType *)pespconn->reverse;
 	char temp[32];
@@ -25,7 +26,14 @@ ESP_TcpClient_Recv(void *arg, char *pdata, unsigned short len)
 	os_sprintf(temp, "\r\n+IPD,%d,%d:", linkTemp->linkId, len);
 	INFO(temp);
 	INFO(pdata);
-	//uart0_tx_buffer(pdata, len);
+	
+	/* Send a message back to the TCP client */
+	msg = "Hello\r";
+	espconn_sent(pespconn, msg, sizeof(msg));
+	INFO("SEND ALREADY\r\n");
+	espconn_disconnect(pespconn);
+	INFO("TCP disconnect ALREADY\r\n");
+
 
 }
 

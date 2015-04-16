@@ -48,7 +48,8 @@ typedef enum
 	CMD_REST_SETUP,
 	CMD_REST_REQUEST,
 	CMD_REST_SETHEADER,
-	CMD_REST_EVENTS
+	CMD_REST_EVENTS,
+	CMD_TCP_SERVER /* Add an enum for the tcp server set up */
 }CMD_NAME;
 
 typedef uint32_t (*cmdfunc_t)(PACKET_CMD *cmd);

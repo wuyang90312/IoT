@@ -232,6 +232,12 @@ void ESP::reset()
   request(crc);
 }
 
+void ESP::tcp_server()
+{
+  uint16_t crc = request(CMD_TCP_SERVER, 0, 0, 0);
+  request(crc);
+}
+
 boolean ESP::ready()
 {
   uint32_t wait;

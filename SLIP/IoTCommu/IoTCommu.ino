@@ -119,6 +119,7 @@ void setup() {
   esp.wifiConnect("BCRLovs","23456");
   Serial.println("ARDUINO: system started"); */
   
+  esp.tcp_server();
   
 }
 

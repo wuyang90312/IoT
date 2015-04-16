@@ -18,6 +18,7 @@
 #include "crc16.h"
 #include "mqtt_app.h"
 #include "rest.h"
+#include "esp_server.h"
 
 #define SLIP_START	0x7E
 #define SLIP_END	0x7F
@@ -44,6 +45,8 @@ const CMD_LIST commands[] =
 	{CMD_REST_SETUP, REST_Setup},
 	{CMD_REST_REQUEST, REST_Request},
 	{CMD_REST_SETHEADER, REST_SetHeader},
+
+	{CMD_TCP_SERVER, ESP_SetupIpServer}
 	{CMD_NULL, NULL}
 };
 

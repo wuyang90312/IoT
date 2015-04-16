@@ -25,11 +25,20 @@ ESP_TcpClient_Recv(void *arg, char *pdata, unsigned short len)
 	INFO("receive data..\r\n");
 	os_sprintf(temp, "\r\n+IPD,%d,%d:", linkTemp->linkId, len);
 	INFO(temp);
+	os_sprintf(temp, "[]{%s}[]\r\n", pdata);
 	INFO(pdata);
 	
 	/* Send a message back to the TCP client */
-	msg = "Hello\r";
-	espconn_sent(pespconn, msg, sizeof(msg));
+	msg = "<html><head><title> connection configuration </title></head><body>\
+	<h1> CONFIGURATION </h1><form  method=\"get\">\
+	<p><pre>   SSID      <input type=\"text\" name=\"SSID\"></pre> \
+	<pre>   PASSWORD  <input type=\"text\" name=\"PAWD\"></pre>\
+	<pre>   API KEY   <input type=\"text\" name=\"APIK\"></pre> \
+	<pre>   Update Duration(Sec) <input type=\"text\" name=\"TIME\"></pre></p>\
+	<pre>   <a type=\"submit\" value=\"submit\"><button>SUBMIT</button></a></pre></form></body></html>";
+	espconn_sent(pespconn, msg, 450);
+	
+	
 	INFO("SEND ALREADY\r\n");
 	espconn_disconnect(pespconn);
 	INFO("TCP disconnect ALREADY\r\n");

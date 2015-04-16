@@ -50,7 +50,7 @@ const CMD_LIST commands[] =
 	{CMD_NULL, NULL}
 };
 
-os_event_t    	cmdRecvQueue[CMD_TASK_QUEUE_SIZE];
+os_event_t		cmdRecvQueue[CMD_TASK_QUEUE_SIZE];
 RINGBUF 		rxRb;
 uint8_t			rxBuf[256];
 

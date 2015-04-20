@@ -7,6 +7,7 @@ static struct espconn *pTcpServer; /* So far only one single server thread is al
 static int local_port = 80; /* Set the TCP server listening port as port 80 */
 static uint16_t server_timeover = 180;
 static linkConType pLink;
+static BOOL WIFI_STA = FALSE;
 
 /**
   * @brief  Client received callback function.
@@ -73,6 +74,8 @@ ESP_TcpClient_Recv(void *arg, char *pdata, unsigned short len)
 			INFO("%s\n", temp);
 			msg = "<html><head><title> DONE </title></head><body>\
 			<h1> SUCCESSFULLY UPDATE </h1> </body></html>";
+
+			WIFI_STA = TRUE;
 		}
 	}
 
@@ -87,6 +90,23 @@ ESP_TcpClient_Recv(void *arg, char *pdata, unsigned short len)
 }
 
 /**
+  * @brief  Client received callback function.
+  * @param  arg: contain the ip link information
+  * @param  pdata: received data
+  * @param  len: the lenght of received data
+  * @retval None
+  */
+LOCAL void ICACHE_FLASH_ATTR
+SP_TcpClient_Discon_cb(void *arg)
+{
+	if(WIFI_STA)
+	{
+		WIFI_Connect((uint8_t*)GLOBAL_SSID, (uint8_t*)GLOBAL_PWD, NULL);
+		WIFI_STA = FALSE;
+	}
+}
+
+/**
   * @brief  Tcp server connect repeat callback function.
   * @param  arg: contain the ip link information
   * @retval None
@@ -94,47 +114,6 @@ ESP_TcpClient_Recv(void *arg, char *pdata, unsigned short len)
 LOCAL void ICACHE_FLASH_ATTR
 ESP_TcpServer_Recon_cb(void *arg, sint8 errType)
 {
-  /*struct espconn *pespconn = (struct espconn *)arg;
-  at_linkConType *linkTemp = (at_linkConType *)pespconn->reverse;
-  char temp[16];
-
-  os_printf("S conect C: %p\r\n", arg);
-
-  if(pespconn == NULL)
-  {
-    return;
-  }
-
-  linkTemp->linkEn = false;
-  linkTemp->pCon = NULL;
-  os_printf("con EN? %d\r\n", linkTemp->linkId);
-  at_linkNum--;
-  if (at_linkNum == 0)
-  {
-    mdState = m_unlink;
-  }
-
-  if(at_ipMux)
-  {
-    os_sprintf(temp, "%d,CONNECT\r\n", linkTemp->linkId);
-    uart0_sendStr(temp);
-  }
-  else
-  {
-    INFO("CONNECT\r\n");
-  }
-
-  disAllFlag = false;
-
-  if(linkTemp->teToff == TRUE)
-  {
-    linkTemp->teToff = FALSE;
-    at_backOk;
-  }
-  ETS_UART_INTR_ENABLE();
-  specialAtState = true;
-  at_state = at_statIdle;*/
-  
   INFO("Re-connected\r\n");
 }
 
@@ -159,7 +138,7 @@ ESP_TcpServerListen(void *arg)
 	pespconn->reverse = &pLink;
 	espconn_regist_recvcb(pespconn, ESP_TcpClient_Recv);
 	espconn_regist_reconcb(pespconn, ESP_TcpServer_Recon_cb);
-	espconn_regist_disconcb(pespconn, NULL);
+	espconn_regist_disconcb(pespconn, ESP_TcpClient_Discon_cb);
 	espconn_regist_sentcb(pespconn, NULL);
 
 }

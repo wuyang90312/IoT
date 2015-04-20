@@ -8,6 +8,7 @@
 #include "espconn.h"
 #include "mem.h"
 #include "osapi.h"
+#include "wifi.h"
 
 typedef enum
 {

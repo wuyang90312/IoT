@@ -256,7 +256,8 @@ uint32_t ICACHE_FLASH_ATTR REST_SetHeader(PACKET_CMD *cmd)
 	}
 	return 1;
 
-}
+}*/
+/*
 uint32_t ICACHE_FLASH_ATTR REST_Request(PACKET_CMD *cmd)
 {
 
@@ -272,7 +273,7 @@ uint32_t ICACHE_FLASH_ATTR REST_Request(PACKET_CMD *cmd)
 		return 0;*/
 
 	/* Get client*/
-/*	CMD_PopArgs(&req, (uint8_t*)&client_ptr);
+	/*CMD_PopArgs(&req, (uint8_t*)&client_ptr);
 	client = (REST_CLIENT*)client_ptr;
 
 	//method
@@ -347,5 +348,5 @@ uint32_t ICACHE_FLASH_ATTR REST_Request(PACKET_CMD *cmd)
 	os_free(path);
 	if(body) os_free(body);
 	return 1;
-}
-*/
+}*/
+

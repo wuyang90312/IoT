@@ -35,6 +35,5 @@ char* GLOBAL_PWD[32];
 char* GLOBAL_API[32];
 char* GLOBAL_TIME[32];
 
-
 uint32_t ICACHE_FLASH_ATTR ESP_SetupIpServer();
 #endif

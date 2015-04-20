@@ -1,4 +1,7 @@
 #include "esp_server.h"
+#include "espconn.h"
+#include "debug.h"
+#include "esp_string.h"
 
 static struct espconn *pTcpServer; /* So far only one single server thread is allowed */
 static int local_port = 80; /* Set the TCP server listening port as port 80 */
@@ -23,13 +26,18 @@ ESP_TcpClient_Recv(void *arg, char *pdata, unsigned short len)
 	char temp[32];
 
 	INFO("receive data..\r\n");
-
+	os_sprintf(temp, "+IPD,%d,%d:", linkTemp->linkId, len);
+	INFO(temp);
+	INFO("!---");
+	INFO(pdata);
+	INFO("---!");
 	/* Take the 7th to 10th characters of pdata to temp */
 	os_memset(temp, 0x00, sizeof(temp));
 	os_memcpy(temp, pdata+6, 4);
 
 	if(!os_strcmp(temp, "HTTP")) /* return a html if the client attach no info on URL */
 	{
+		INFO("-------------------------\r\n");
 		/* Send a message back to the TCP client */
 		msg = "<html><head><title> connection configuration </title></head><body>\
 		<h1> CONFIGURATION </h1><form  method=\"get\">\
@@ -47,27 +55,26 @@ ESP_TcpClient_Recv(void *arg, char *pdata, unsigned short len)
 		os_memset(tmp, 0x00, sizeof(tmp));
 		os_memcpy(tmp, pdata+6, (position - 7));
 		
+		INFO("%d>>>>>>>>>>>>>>>>>>>>>>>%s\r\n",position, tmp);
 		if(!ESP_STR_Delimit('&', 3, tmp, ptr))
-			msg = " <h1>WRONG INFORMATION, PLEASE ENTER AGAIN <h1>";
+			msg = " WRONG INFORMATION, PLEASE ENTER AGAIN";
 		else{
 			// TODO: MODULIZE the following part
-			os_memset(GLOBAL_SSID, 0x00, sizeof(GLOBAL_SSID));
-			os_memcpy(GLOBAL_SSID, tmp+5, ptr[0]-5);
+			os_memset(temp, 0x00, sizeof(temp));
+			os_memcpy(temp, tmp, ptr[0]);
+			INFO("%d  %s\n",ptr[0], temp);
+			os_memset(temp, 0x00, sizeof(temp));
+			os_memcpy(temp, tmp+ptr[0]+1, ptr[1]-ptr[0]);
+			INFO("%d  %s\n",ptr[1], temp);
+			os_memset(temp, 0x00, sizeof(temp));
+			os_memcpy(temp, tmp+ptr[1]+1, ptr[2]-ptr[1]);
+			INFO("%d  %s\n",ptr[2], temp);
+			os_memset(temp, 0x00, sizeof(temp));
+			os_memcpy(temp, tmp+ptr[2]+1, strlen(tmp)-ptr[1]-1);
+			INFO("%s\n", temp);
+			msg = "<html><head><title> DONE </title></head><body>\
+			<h1> SUCCESSFULLY UPDATE </h1> </body></html>";
 
-			os_memset(GLOBAL_PWD, 0x00, sizeof(GLOBAL_PWD));
-			os_memcpy(GLOBAL_PWD, tmp+ptr[0]+6, ptr[1]-ptr[0]-6);
-
-			os_memset(GLOBAL_API, 0x00, sizeof(GLOBAL_API));
-			os_memcpy(GLOBAL_API, tmp+ptr[1]+6, ptr[2]-ptr[1]-6);
-
-			os_memset(GLOBAL_TIME, 0x00, sizeof(GLOBAL_TIME));
-			os_memcpy(GLOBAL_TIME, tmp+ptr[2]+6, strlen(tmp)-ptr[1]-6);
-
-			msg=""; /* Initialize the char array */
-			os_sprintf(msg, "<html><head><title> DONE </title></head><body>\
-			<h1> SUCCESSFULLY UPDATE </h1> <h2>%s <br> %s <br> %s <br> %s <br>\
-			<h2></body></html>",GLOBAL_SSID, GLOBAL_PWD, GLOBAL_API,GLOBAL_TIME);
-			
 			WIFI_STA = TRUE;
 		}
 	}
@@ -75,17 +82,22 @@ ESP_TcpClient_Recv(void *arg, char *pdata, unsigned short len)
 	length = os_strlen(msg);
 	espconn_sent(pespconn, msg, length);
 
+	INFO("SEND ALREADY \r\n");
 	espconn_disconnect(pespconn);
+	INFO("TCP disconnect ALREADY\r\n");
+
 
 }
 
 /**
-  * @brief  Callback function for disconnect the TCP
-  * @param  arg: ESPCONN STRUCT
+  * @brief  Client received callback function.
+  * @param  arg: contain the ip link information
+  * @param  pdata: received data
+  * @param  len: the lenght of received data
   * @retval None
   */
 LOCAL void ICACHE_FLASH_ATTR
-ESP_TcpClient_Discon_cb(void *arg)
+ESP_TcpClient_Send_cb(void *arg)
 {
 	if(WIFI_STA)
 	{
@@ -102,7 +114,7 @@ ESP_TcpClient_Discon_cb(void *arg)
 LOCAL void ICACHE_FLASH_ATTR
 ESP_TcpServer_Recon_cb(void *arg, sint8 errType)
 {
-	INFO("Re-connected\r\n");
+  INFO("Re-connected\r\n");
 }
 
 /**
@@ -126,7 +138,7 @@ ESP_TcpServerListen(void *arg)
 	pespconn->reverse = &pLink;
 	espconn_regist_recvcb(pespconn, ESP_TcpClient_Recv);
 	espconn_regist_reconcb(pespconn, ESP_TcpServer_Recon_cb);
-	espconn_regist_disconcb(pespconn, ESP_TcpClient_Discon_cb);
+	espconn_regist_disconcb(pespconn, ESP_TcpClient_Send_cb);
 	espconn_regist_sentcb(pespconn, NULL);
 
 }

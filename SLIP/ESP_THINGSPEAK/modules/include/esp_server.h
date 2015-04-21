@@ -11,6 +11,10 @@
 #include "esp_string.h"
 #include "wifi.h"
 
+/* Define a type of the function pointer */
+typedef void (*ptrFunction)(void); 
+ptrFunction fcn_cb_ptr;
+
 typedef enum
 {
   teClient,

@@ -1,10 +1,49 @@
 #include "esp_server.h"
 
+
+#include "rest.h"
+
 static struct espconn *pTcpServer; /* So far only one single server thread is allowed */
 static int local_port = 80; /* Set the TCP server listening port as port 80 */
 static uint16_t server_timeover = 180;
 static linkConType pLink;
 static BOOL WIFI_STA = FALSE;
+
+/*--------------------------------------------------------------------------------
+static ETSTimer timer;
+static uint16_t len;
+static char* hst;
+static char* str;
+
+void ICACHE_FLASH_ATTR
+timer_cb(void *arg)
+{
+	uint32_t rst = (uint32_t) arg;
+	REST_Request(rst, "GET", str);
+}
+
+void ICACHE_FLASH_ATTR
+user_continue(void)
+{
+	uint32_t rst;
+	uint16_t time = 60000;
+
+	str = "/update?api_key=GPVP0E6QQVWU47LZ&field1=50";
+	hst = "api.thingspeak.com";
+	len = os_strlen(hst);
+
+	WIFI_Connect("BCRLovs", "23456", NULL);
+	
+	rst = REST_Setup(hst, len, 80,0x00000000);
+
+	os_timer_disarm(&timer);
+	os_timer_setfn(&timer, (os_timer_func_t *)timer_cb, rst);
+	os_timer_arm(&timer, 60000, 1);
+
+}
+--------------------------------------------------------------------------------*/
+
+
 
 /**
   * @brief  Client received callback function.
@@ -74,7 +113,6 @@ ESP_TcpClient_Recv(void *arg, char *pdata, unsigned short len)
 
 	length = os_strlen(msg);
 	espconn_sent(pespconn, msg, length);
-
 	espconn_disconnect(pespconn);
 
 }
@@ -89,8 +127,13 @@ ESP_TcpClient_Discon_cb(void *arg)
 {
 	if(WIFI_STA)
 	{
-		WIFI_Connect((uint8_t*)GLOBAL_SSID, (uint8_t*)GLOBAL_PWD, NULL);
+		/* Branch to the TCP update function in main.c */
 		WIFI_STA = FALSE;
+		/* Delete the TCP connection */
+		os_free(pTcpServer);
+		/* Call the function ptr*/
+		fcn_cb_ptr();
+
 	}
 }
 
@@ -139,20 +182,24 @@ ESP_TcpServerListen(void *arg)
 uint32_t ICACHE_FLASH_ATTR
 ESP_SetupIpServer()
 {
-	INFO("Start a TCP server\r\n");
+	//fcn_cb_ptr();
+
 	pTcpServer = (struct espconn *)os_zalloc(sizeof(struct espconn));
 	if (pTcpServer == NULL)
 	{
 		INFO("TcpServer Failure\r\n");
 		return 0xFFFFFFFF;
 	}
+	
 	pTcpServer->type = ESPCONN_TCP;
 	pTcpServer->state = ESPCONN_NONE;
 	pTcpServer->proto.tcp = (esp_tcp *)os_zalloc(sizeof(esp_tcp));
 	pTcpServer->proto.tcp->local_port = local_port;
+	
 	espconn_regist_connectcb(pTcpServer, ESP_TcpServerListen);
 	espconn_accept(pTcpServer);
 	espconn_regist_time(pTcpServer, server_timeover, 0);
 
 	return 0;
+
 }

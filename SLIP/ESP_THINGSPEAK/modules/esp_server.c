@@ -7,6 +7,7 @@ static struct espconn *pTcpServer; /* So far only one single server thread is al
 static int local_port = 80; /* Set the TCP server listening port as port 80 */
 static uint16_t server_timeover = 180;
 static linkConType pLink;
+static configInfo* config;
 static BOOL WIFI_STA = FALSE;
 
 /*--------------------------------------------------------------------------------
@@ -90,22 +91,18 @@ ESP_TcpClient_Recv(void *arg, char *pdata, unsigned short len)
 			msg = " <h1>WRONG INFORMATION, PLEASE ENTER AGAIN <h1>";
 		else{
 			// TODO: MODULIZE the following part
-			os_memset(GLOBAL_SSID, 0x00, sizeof(GLOBAL_SSID));
-			os_memcpy(GLOBAL_SSID, tmp+5, ptr[0]-5);
+			config = (configInfo*)os_zalloc(sizeof(configInfo));
 
-			os_memset(GLOBAL_PWD, 0x00, sizeof(GLOBAL_PWD));
-			os_memcpy(GLOBAL_PWD, tmp+ptr[0]+6, ptr[1]-ptr[0]-6);
 
-			os_memset(GLOBAL_API, 0x00, sizeof(GLOBAL_API));
-			os_memcpy(GLOBAL_API, tmp+ptr[1]+6, ptr[2]-ptr[1]-6);
-
-			os_memset(GLOBAL_TIME, 0x00, sizeof(GLOBAL_TIME));
-			os_memcpy(GLOBAL_TIME, tmp+ptr[2]+6, strlen(tmp)-ptr[1]-6);
+			os_memcpy(config->SSID, tmp+5, ptr[0]-5);
+			os_memcpy(config->PWD, tmp+ptr[0]+6, ptr[1]-ptr[0]-6);
+			os_memcpy(config->API, tmp+ptr[1]+6, ptr[2]-ptr[1]-6);
+			os_memcpy(config->TIME, tmp+ptr[2]+6, strlen(tmp)-ptr[1]-6);
 
 			msg=""; /* Initialize the char array */
 			os_sprintf(msg, "<html><head><title> DONE </title></head><body>\
 			<h1> SUCCESSFULLY UPDATE </h1> <h2>%s <br> %s <br> %s <br> %s <br>\
-			<h2></body></html>",GLOBAL_SSID, GLOBAL_PWD, GLOBAL_API,GLOBAL_TIME);
+			<h2></body></html>",config->SSID, config->PWD, config->API,config->TIME);
 			
 			WIFI_STA = TRUE;
 		}
@@ -127,13 +124,18 @@ ESP_TcpClient_Discon_cb(void *arg)
 {
 	if(WIFI_STA)
 	{
+		uint8_t input =101;
 		/* Branch to the TCP update function in main.c */
 		WIFI_STA = FALSE;
 		/* Delete the TCP connection */
 		os_free(pTcpServer);
-		/* Call the function ptr*/
-		fcn_cb_ptr();
-
+		/* Store information into permanent memory, set the flag */
+		spi_flash_erase_sector(0x7d);
+		spi_flash_write((0x7d)*4096, (uint32 *) &input, 4);
+		spi_flash_write((0x7d)*4096+4, (uint32 *) &config, sizeof(configInfo));
+		os_free(config);
+		/* Restart the system */
+		system_restart();
 	}
 }
 
@@ -182,8 +184,6 @@ ESP_TcpServerListen(void *arg)
 uint32_t ICACHE_FLASH_ATTR
 ESP_SetupIpServer()
 {
-	//fcn_cb_ptr();
-
 	pTcpServer = (struct espconn *)os_zalloc(sizeof(struct espconn));
 	if (pTcpServer == NULL)
 	{

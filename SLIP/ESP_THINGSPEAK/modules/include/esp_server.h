@@ -11,10 +11,6 @@
 #include "esp_string.h"
 #include "wifi.h"
 
-/* Define a type of the function pointer */
-typedef void (*ptrFunction)(void); 
-ptrFunction fcn_cb_ptr;
-
 typedef enum
 {
   teClient,
@@ -34,10 +30,15 @@ typedef struct
 	struct espconn *pCon;
 }linkConType;
 
-char* GLOBAL_SSID[32];
-char* GLOBAL_PWD[32];
-char* GLOBAL_API[32];
-char* GLOBAL_TIME[32];
+typedef struct
+{
+char SSID[32];
+char PWD[32];
+char API[32];
+char TIME[32];
+}configInfo;
+
+
 
 uint32_t ICACHE_FLASH_ATTR ESP_SetupIpServer();
 #endif

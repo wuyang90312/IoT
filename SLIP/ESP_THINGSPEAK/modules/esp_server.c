@@ -124,7 +124,7 @@ ESP_TcpClient_Discon_cb(void *arg)
 {
 	if(WIFI_STA)
 	{
-		uint8_t input =101;
+		uint32_t input =0x10101010;
 		/* Branch to the TCP update function in main.c */
 		WIFI_STA = FALSE;
 		/* Delete the TCP connection */
@@ -132,7 +132,7 @@ ESP_TcpClient_Discon_cb(void *arg)
 		/* Store information into permanent memory, set the flag */
 		spi_flash_erase_sector(0x7d);
 		spi_flash_write((0x7d)*4096, (uint32 *) &input, 4);
-		spi_flash_write((0x7d)*4096+4, (uint32 *) &config, sizeof(configInfo));
+		spi_flash_write((0x7d)*4096+4, (uint32 *) config, sizeof(configInfo));
 		os_free(config);
 		/* Restart the system */
 		system_restart();

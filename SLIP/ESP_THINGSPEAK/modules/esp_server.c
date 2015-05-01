@@ -93,6 +93,7 @@ ESP_TcpClient_Recv(void *arg, char *pdata, unsigned short len)
 			// TODO: MODULIZE the following part
 			config = (configInfo*)os_zalloc(sizeof(configInfo));
 
+			// TODO: The URL replace white space by +. Revert the change
 			os_memcpy(config->SSID, tmp+5, ptr[0]-5);
 			os_memcpy(config->PWD, tmp+ptr[0]+6, ptr[1]-ptr[0]-6);
 			os_memcpy(config->API, tmp+ptr[1]+6, ptr[2]-ptr[1]-6);
@@ -111,6 +112,8 @@ ESP_TcpClient_Recv(void *arg, char *pdata, unsigned short len)
 	espconn_sent(pespconn, msg, length);
 	espconn_disconnect(pespconn);
 
+	//system_deep_sleep_set_option(0);
+	//system_deep_sleep(30000000);
 }
 
 /**

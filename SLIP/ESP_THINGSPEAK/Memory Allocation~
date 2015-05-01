@@ -1,0 +1,5 @@
+The Memory Allocation
+
+STARTING ADDRESS: 0x7d000 (reference: )
+This is the starting point of sector 0x7d 
+Every sector has 4096 bytes. 

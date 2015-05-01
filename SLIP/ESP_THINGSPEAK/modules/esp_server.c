@@ -93,7 +93,6 @@ ESP_TcpClient_Recv(void *arg, char *pdata, unsigned short len)
 			// TODO: MODULIZE the following part
 			config = (configInfo*)os_zalloc(sizeof(configInfo));
 
-
 			os_memcpy(config->SSID, tmp+5, ptr[0]-5);
 			os_memcpy(config->PWD, tmp+ptr[0]+6, ptr[1]-ptr[0]-6);
 			os_memcpy(config->API, tmp+ptr[1]+6, ptr[2]-ptr[1]-6);
@@ -130,9 +129,9 @@ ESP_TcpClient_Discon_cb(void *arg)
 		/* Delete the TCP connection */
 		os_free(pTcpServer);
 		/* Store information into permanent memory, set the flag */
-		spi_flash_erase_sector(0x7d);
-		spi_flash_write((0x7d)*4096, (uint32 *) &input, 4);
-		spi_flash_write((0x7d)*4096+4, (uint32 *) config, sizeof(configInfo));
+		spi_flash_erase_sector(0x3f);
+		spi_flash_write((0x3f)*4096, (uint32 *) &input, 4);
+		spi_flash_write((0x3f)*4096+4, (uint32 *) config, sizeof(configInfo));
 		os_free(config);
 		/* Restart the system */
 		system_restart();

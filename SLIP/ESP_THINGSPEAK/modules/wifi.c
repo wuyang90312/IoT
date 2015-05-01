@@ -12,6 +12,7 @@
 #include "user_config.h"
 #include "debug.h"
 
+static int LOSTconn = 0;
 static ETSTimer WiFiLinker;
 WifiCallback wifiCb = NULL;
 static uint8_t wifiStatus = STATION_IDLE, lastWifiStatus = STATION_IDLE;
@@ -36,7 +37,18 @@ static void ICACHE_FLASH_ATTR wifi_check_ip(void *arg)
 		}
 		else if(wifi_station_get_connect_status() == STATION_NO_AP_FOUND)
 		{
-			INFO("STATION_NO_AP_FOUND\r\n");
+			INFO("STATION_NO_AP_FOUND:%d\r\n", LOSTconn);
+			LOSTconn++;
+			if( LOSTconn >= 5 )
+			{
+				LOSTconn = 0;
+				uint32_t input =0xffffffff;
+				spi_flash_erase_sector(0x7e);
+				spi_flash_write((0x7e)*4096, (uint32 *) &input, 4);
+				/* Restart the system */
+				system_restart();
+			}
+			
 			wifi_station_connect();
 		}
 		else if(wifi_station_get_connect_status() == STATION_CONNECT_FAIL)

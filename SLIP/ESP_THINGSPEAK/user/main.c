@@ -28,7 +28,7 @@ user_continue(void)
 	configInfo* configuration = (configInfo*)os_zalloc(sizeof(configInfo));
 	
 	/* Read configuration information from permanent memory */
-	spi_flash_read((0x7d)*4096+4, (uint32 *) configuration, sizeof(configInfo));
+	spi_flash_read((0x3f)*4096+4, (uint32 *) configuration, sizeof(configInfo));
 	time = (uint16_t)atoi(configuration->TIME);
 	time *=1000;
 	INFO("\nThe configuration is:||%s||%s||%s||%u||\n", 
@@ -54,9 +54,7 @@ user_init(void)
 	uart_init(BIT_RATE_115200, BIT_RATE_115200);
 	os_delay_us(1000000);
 
-	//spi_flash_erase_sector(0x7d);
-	//spi_flash_write((0x7d)*4096, (uint32 *) &buff, 4);
-	spi_flash_read((0x7d)*4096, (uint32 *) &buff, 4);
+	spi_flash_read((0x3f)*4096, (uint32 *) &buff, 4);
 	INFO("\nThe memeory is: %x\n", buff);
 	if(buff == 0x10101010)
 	{

@@ -1,6 +1,5 @@
 #include "esp_server.h"
-
-
+#include "global_var.h"
 #include "rest.h"
 
 static struct espconn *pTcpServer; /* So far only one single server thread is allowed */
@@ -9,42 +8,6 @@ static uint16_t server_timeover = 180;
 static linkConType pLink;
 static configInfo* config;
 static BOOL WIFI_STA = FALSE;
-
-/*--------------------------------------------------------------------------------
-static ETSTimer timer;
-static uint16_t len;
-static char* hst;
-static char* str;
-
-void ICACHE_FLASH_ATTR
-timer_cb(void *arg)
-{
-	uint32_t rst = (uint32_t) arg;
-	REST_Request(rst, "GET", str);
-}
-
-void ICACHE_FLASH_ATTR
-user_continue(void)
-{
-	uint32_t rst;
-	uint16_t time = 60000;
-
-	str = "/update?api_key=GPVP0E6QQVWU47LZ&field1=50";
-	hst = "api.thingspeak.com";
-	len = os_strlen(hst);
-
-	WIFI_Connect("BCRLovs", "23456", NULL);
-	
-	rst = REST_Setup(hst, len, 80,0x00000000);
-
-	os_timer_disarm(&timer);
-	os_timer_setfn(&timer, (os_timer_func_t *)timer_cb, rst);
-	os_timer_arm(&timer, 60000, 1);
-
-}
---------------------------------------------------------------------------------*/
-
-
 
 /**
   * @brief  Client received callback function.
@@ -126,15 +89,15 @@ ESP_TcpClient_Discon_cb(void *arg)
 {
 	if(WIFI_STA)
 	{
-		uint32_t input =0x10101010;
+		uint32_t input =UP_FLAG;
 		/* Branch to the TCP update function in main.c */
 		WIFI_STA = FALSE;
 		/* Delete the TCP connection */
 		os_free(pTcpServer);
 		/* Store information into permanent memory, set the flag */
-		spi_flash_erase_sector(0x3f);
-		spi_flash_write((0x3f)*4096, (uint32 *) &input, 4);
-		spi_flash_write((0x3f)*4096+4, (uint32 *) config, sizeof(configInfo));
+		spi_flash_erase_sector(EEPROM_SECTION);
+		spi_flash_write((EEPROM_SECTION)*SECTION_SIZE, (uint32 *) &input, 4);
+		spi_flash_write((EEPROM_SECTION)*SECTION_SIZE+4, (uint32 *) config, sizeof(configInfo));
 		os_free(config);
 		/* Restart the system */
 		system_restart();

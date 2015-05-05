@@ -15,6 +15,8 @@
 #include "os_type.h"
 #include "debug.h"
 
+static int NO_IP = 0;	/* counter for no ip connnection */
+
 void ICACHE_FLASH_ATTR
 tcpclient_discon_cb(void *arg)
 {
@@ -120,7 +122,15 @@ rest_dns_found(const char *name, ip_addr_t *ipaddr, void *arg)
 	REST_CLIENT* client = (REST_CLIENT *)pConn->reverse;
 	if(ipaddr == NULL)
 	{
-		INFO("REST DNS: Found, but got no ip, try to reconnect\r\n");
+		INFO("REST DNS: Found, but got no ip, try to reconnect:%d\r\n", NO_IP);
+		
+		if(NO_IP >= 10)
+		{
+			NO_IP = 0;
+			system_restart();
+		}
+		
+		NO_IP++;
 		return;
 	}
 

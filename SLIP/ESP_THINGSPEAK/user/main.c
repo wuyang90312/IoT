@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "esp_server.h"
 #include "esp_string.h"
+#include "global_var.h"
 
 static ETSTimer timer;
 char str[255];
@@ -28,7 +29,7 @@ user_continue(void)
 	configInfo* configuration = (configInfo*)os_zalloc(sizeof(configInfo));
 	
 	/* Read configuration information from permanent memory */
-	spi_flash_read((0x3f)*4096+4, (uint32 *) configuration, sizeof(configInfo));
+	spi_flash_read((EEPROM_SECTION)*SECTION_SIZE+4, (uint32 *) configuration, sizeof(configInfo));
 	time = (uint16_t)atoi(configuration->TIME);
 	time *=1000;
 	INFO("\nThe configuration is:||%s||%s||%s||%u||\n", 
@@ -50,13 +51,13 @@ user_continue(void)
 void ICACHE_FLASH_ATTR
 user_init(void)
 {
-	uint32_t buff=0xffffffff;
+	uint32_t buff=DOWN_FLAG;
 	uart_init(BIT_RATE_115200, BIT_RATE_115200);
 	os_delay_us(1000000);
 
-	spi_flash_read((0x3f)*4096, (uint32 *) &buff, 4);
+	spi_flash_read((EEPROM_SECTION)*SECTION_SIZE, (uint32 *) &buff, 4);
 	INFO("\nThe memeory is: %x\n", buff);
-	if(buff == 0x10101010)
+	if(buff == UP_FLAG)
 	{
 		user_continue();
 	}

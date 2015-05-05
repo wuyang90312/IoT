@@ -11,6 +11,7 @@
 #include "mem.h"
 #include "user_config.h"
 #include "debug.h"
+#include "global_var.h"
 
 static int LOSTconn = 0;
 static ETSTimer WiFiLinker;
@@ -42,9 +43,9 @@ static void ICACHE_FLASH_ATTR wifi_check_ip(void *arg)
 			if( LOSTconn >= 5 )
 			{
 				LOSTconn = 0;
-				uint32_t input =0xffffffff;
-				spi_flash_erase_sector(0x7e);
-				spi_flash_write((0x7e)*4096, (uint32 *) &input, 4);
+				uint32_t input =DOWN_FLAG;
+				spi_flash_erase_sector(EEPROM_SECTION);
+				spi_flash_write((EEPROM_SECTION)*SECTION_SIZE, (uint32 *) &input, 4);
 				/* Restart the system */
 				system_restart();
 			}

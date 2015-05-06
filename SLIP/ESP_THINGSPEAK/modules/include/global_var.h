@@ -7,4 +7,6 @@
 #define	DOWN_FLAG		0xFFFFFFFF		/* The flag meaning EEPROM is empty */
 #define	UP_FLAG			0x10101010		/* The flag meaning EEPROM is already written */
 
+
+#define	TIME_ELEMENT	1000			/* Make 1000 ms as the elementary time interval */
 #endif

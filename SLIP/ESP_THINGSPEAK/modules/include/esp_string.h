@@ -11,4 +11,7 @@ ESP_STR_ExtractData(uint16_t start,const char* target, char* pdata, uint8_t leng
 
 BOOL ICACHE_FLASH_ATTR
 ESP_STR_Delimit(char token, uint8_t num, char* target, uint16_t* ptr);
+
+void ICACHE_FLASH_ATTR
+ESP_STR_URL_Decode(char *str, int size);
 #endif

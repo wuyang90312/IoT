@@ -49,6 +49,7 @@ ESP_TcpClient_Recv(void *arg, char *pdata, unsigned short len)
 		char tmp[128];
 		os_memset(tmp, 0x00, sizeof(tmp));
 		os_memcpy(tmp, pdata+6, (position - 7));
+		ESP_STR_URL_Decode(tmp, sizeof(tmp));
 		
 		if(!ESP_STR_Delimit('&', 3, tmp, ptr))
 			msg = " <h1>WRONG INFORMATION, PLEASE ENTER AGAIN <h1>";
@@ -74,9 +75,6 @@ ESP_TcpClient_Recv(void *arg, char *pdata, unsigned short len)
 	length = os_strlen(msg);
 	espconn_sent(pespconn, msg, length);
 	espconn_disconnect(pespconn);
-
-	//system_deep_sleep_set_option(0);
-	//system_deep_sleep(30000000);
 }
 
 /**

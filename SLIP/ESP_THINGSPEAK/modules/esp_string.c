@@ -57,3 +57,59 @@ ESP_STR_Delimit(char token, uint8_t num, char* target, uint16_t* ptr)
 
 	return FALSE;
 }
+
+/**
+  * @brief  Check whether the character is a digit
+  * @param  ch: Target character
+  * @retval  BOOL whether the character is a digit
+  */
+int ESP_STR_IsDigit(char ch)
+{
+	if(ch>='0' && ch<='9')
+		return 1;
+	else
+		return 0;
+}
+
+/**
+  * @brief  Convert all capital letter to small case
+  * @param  ch: Target character
+  * @retval  Small case letter
+  */
+char ESP_STR_ToLower(char ch)
+{
+	if(ch<='Z' )
+		return ('A'+0x20);
+}
+
+/**
+  * @brief  Convert the String hex to integer hex
+  * @param  ch: Target character
+  * @retval  Integer hex number
+  */
+char ESP_STR_From_Hex(char ch) {
+  return ESP_STR_IsDigit(ch) ? ch - '0' : ESP_STR_ToLower(ch) - 'a' + 10;
+}
+
+/* Returns a url-decoded version of str */
+/* IMPORTANT: be sure to free() the returned string after use */
+void ICACHE_FLASH_ATTR
+ESP_STR_URL_Decode(char *str, int size) {
+	char *pstr = str, *buf = (char*) os_malloc(size + 1), *pbuf = buf;
+	while (*pstr) {
+		if (*pstr == '%') {
+			if (pstr[1] && pstr[2]) {
+			*pbuf++ = ESP_STR_From_Hex(pstr[1]) << 4 | ESP_STR_From_Hex(pstr[2]);
+			pstr += 2;
+		}
+		} else if (*pstr == '+') { 
+			*pbuf++ = ' ';
+		} 
+		else {
+			*pbuf++ = *pstr;
+		}
+		pstr++;
+	}
+	*pbuf = '\0';
+	os_memcpy(str, buf, size);
+}

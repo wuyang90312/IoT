@@ -24,7 +24,7 @@ timer_cb(void *arg)
 	}
 	else
 	{
-		INFO("WAIT FOR NXT TERM:%u\n", cycleCnter);
+		//INFO("WAIT FOR NXT TERM:%u\n", cycleCnter);
 	}
 	cycleCnter = (cycleCnter+1)%waitCycle;
 }

@@ -10,6 +10,8 @@
 #include "c_types.h"
 #include "ip_addr.h"
 
+int ALREADYSENT;
+
 typedef enum {
   HEADER_GENERIC = 0,
   HEADER_CONTENT_TYPE,
@@ -30,8 +32,7 @@ typedef struct {
 	uint8_t* user_agent;
 	uint32_t resp_cb;
 } REST_CLIENT;
-/*
-uint32_t REST_Setup(PACKET_CMD *cmd);
-uint32_t REST_Request(PACKET_CMD *cmd);
-uint32_t REST_SetHeader(PACKET_CMD *cmd);*/
+
+uint32_t ICACHE_FLASH_ATTR REST_Setup(uint8_t *rest_host, uint16_t len, uint32_t port,uint32_t security);
+uint32_t ICACHE_FLASH_ATTR REST_Request(uint32_t client_ptr, uint8_t *method, uint8_t *path);
 #endif /* MODULES_INCLUDE_API_H_ */

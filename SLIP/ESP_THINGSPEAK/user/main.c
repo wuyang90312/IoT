@@ -10,35 +10,25 @@
 #include "global_var.h"
 
 static ETSTimer timer;
-static uint16_t waitCycle;
+static uint32_t globTime=0;
 static uint16_t cycleCnter = 0;
 char str[255];
 
 void ICACHE_FLASH_ATTR
 timer_cb(void *arg)
 {
-	if(cycleCnter == 0)
+	uint32_t rst = (uint32_t) arg;
+	REST_Request(rst, "GET", str);
+	if(wifi_station_get_connect_status() == STATION_GOT_IP&&ALREADYSENT==1)
 	{
-		uint32_t rst = (uint32_t) arg;
-		REST_Request(rst, "GET", str);
+		system_deep_sleep(globTime);
 	}
-	else
-	{
-		//INFO("WAIT FOR NXT TERM:%u\n", cycleCnter);
-	}
-	cycleCnter = (cycleCnter+1)%waitCycle;
 }
 
 void ICACHE_FLASH_ATTR
-func_repeat(os_timer_func_t *timer_cb, uint32_t arg_ptr, uint16_t time)
+func_repeat(os_timer_func_t *timer_cb, uint32_t arg_ptr)
 {
 	uint16_t time_slice = TIME_ELEMENT;
-	if(time<=65){
-		time_slice = time*1000;
-		waitCycle = 1;
-	}else{
-		waitCycle = time;	/* time is how many seconds here */
-	}
 
 	os_timer_disarm(&timer);
 	os_timer_setfn(&timer, timer_cb, arg_ptr);
@@ -51,15 +41,15 @@ user_continue(void)
 	uint16_t len;
 	char* hst;
 	uint32_t rst;
-	uint16_t time = 30;
 	configInfo* configuration = (configInfo*)os_zalloc(sizeof(configInfo));
 	
 	/* Read configuration information from permanent memory */
 	spi_flash_read((EEPROM_SECTION)*SECTION_SIZE+4, (uint32 *) configuration, sizeof(configInfo));
-	time = (uint16_t)atoi(configuration->TIME);
+	globTime = (uint16_t)atoi(configuration->TIME);
 
 	INFO("\nThe configuration is:||%s||%s||%s||%u||\n", 
-	configuration->SSID, configuration->PWD, configuration->API,time);
+	configuration->SSID, configuration->PWD, configuration->API,globTime);
+	globTime *= 1000000;
 
 	os_sprintf(str, "/update?api_key=%s&field1=40", &configuration->API);
 	hst = "api.thingspeak.com";
@@ -68,7 +58,7 @@ user_continue(void)
 	WIFI_Connect((uint8_t*)configuration->SSID, (uint8_t*)configuration->PWD, NULL);
 	rst = REST_Setup(hst, len, 80,0x00000000);
 
-	func_repeat((os_timer_func_t *)timer_cb, rst, time);
+	func_repeat((os_timer_func_t *)timer_cb, rst);
 }
 
 void ICACHE_FLASH_ATTR

@@ -88,6 +88,7 @@ tcpclient_sent_cb(void *arg)
 {
 	struct espconn *pCon = (struct espconn *)arg;
 	REST_CLIENT* client = (REST_CLIENT *)pCon->reverse;
+	ALREADYSENT = 1;
 	INFO("REST: Sent\r\n");
 }
 

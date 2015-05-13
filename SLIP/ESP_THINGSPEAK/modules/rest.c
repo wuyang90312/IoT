@@ -125,12 +125,6 @@ rest_dns_found(const char *name, ip_addr_t *ipaddr, void *arg)
 	{
 		INFO("REST DNS: Found, but got no ip, try to reconnect:%d\r\n", NO_IP);
 		
-		if(NO_IP >= 10)
-		{
-			NO_IP = 0;
-			system_restart();
-		}
-		
 		NO_IP++;
 		return;
 	}
@@ -150,7 +144,14 @@ rest_dns_found(const char *name, ip_addr_t *ipaddr, void *arg)
 		else {
 			espconn_connect(client->pCon);
 		}
-		INFO("REST: connecting...\r\n");
+		INFO("REST: connecting...:%d\r\n", NO_IP);
+		NO_IP++;
+	}
+	
+	if(NO_IP >= 10)
+	{
+		NO_IP = 0;
+		system_restart();
 	}
 }
 uint32_t ICACHE_FLASH_ATTR 

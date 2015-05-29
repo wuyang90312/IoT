@@ -3,24 +3,55 @@
 #include "user_interface.h"
 #include "rest.h"
 #include "wifi.h"
+#include "ADXL.h"
 #include "driver/uart.h"
 #include "debug.h"
 #include "esp_server.h"
 #include "esp_string.h"
 #include "global_var.h"
 
+#define SCALE_BIT	0x02
+#define COE_SCALE	64  /* The scale coefficient for 8g */
+
 static ETSTimer timer;
 static uint16_t waitCycle;
 static uint16_t cycleCnter = 0;
 char str[255];
+char int_value[16];
+
+void ICACHE_FLASH_ATTR
+acceleration_update()
+{
+	char* sign;
+	int upper=0,lower,data;
+	//Disable interrupts
+	ETS_GPIO_INTR_DISABLE();
+	data = ESP_acquire_data(0x37, 0x36);
+	//Turn interrupt back on
+	ETS_GPIO_INTR_ENABLE();
+
+	
+	upper = (int)data/COE_SCALE;
+	lower = abs((int)data%COE_SCALE)*10000/COE_SCALE;
+	sign = (data<0&&upper>=0)?"-":""; /* add a minus sign if it is omitted */
+	os_sprintf(int_value, "%s%d.%04d", sign, upper, lower);
+}
 
 void ICACHE_FLASH_ATTR
 timer_cb(void *arg)
 {
 	if(cycleCnter == 0)
 	{
+		char tmp[255], int_tmp[8];
+
+		//os_sprintf(int_tmp,"%d", acceleration_update());
+		acceleration_update();
+		INFO("\n The value is: %s\n", int_value);
+		os_sprintf(tmp,"%s%s", str,int_value);
+		//os_strcat(tmp, int_value);
+		//INFO("\n %s \n", tmp);
 		uint32_t rst = (uint32_t) arg;
-		REST_Request(rst, "GET", str);
+		REST_Request(rst, "GET", tmp);
 	}
 	else
 	{
@@ -40,6 +71,7 @@ func_repeat(os_timer_func_t *timer_cb, uint32_t arg_ptr, uint16_t time)
 		waitCycle = time;	/* time is how many seconds here */
 	}
 
+	ESP_init_config(SCALE_BIT);
 	os_timer_disarm(&timer);
 	os_timer_setfn(&timer, timer_cb, arg_ptr);
 	os_timer_arm(&timer, time_slice, 1);
@@ -61,7 +93,7 @@ user_continue(void)
 	INFO("\nThe configuration is:||%s||%s||%s||%u||\n", 
 	configuration->SSID, configuration->PWD, configuration->API,time);
 
-	os_sprintf(str, "/update?api_key=%s&field1=40", &configuration->API);
+	os_sprintf(str, "/update?api_key=%s&field2=", &configuration->API);
 	hst = "api.thingspeak.com";
 	len = os_strlen(hst);
 
@@ -81,7 +113,7 @@ user_init(void)
 	//spi_flash_erase_sector(EEPROM_SECTION);
 	//spi_flash_write((EEPROM_SECTION)*SECTION_SIZE, (uint32 *) &buff, 4);
 	spi_flash_read((EEPROM_SECTION)*SECTION_SIZE, (uint32 *) &buff, 4);
-	INFO("\nThe memeory is: %x\n", buff);
+	//INFO("\nThe memeory is: %x\n", buff);
 	if(buff == UP_FLAG)
 	{
 		user_continue();

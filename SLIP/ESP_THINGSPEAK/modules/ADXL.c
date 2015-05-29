@@ -2,11 +2,23 @@
 #include "debug.h"
 #include "ADXL.h"
 
+/* Set up the configuration of an I2C channel
+ * @param	id		channel number
+ * @param	sda		sda PIN number
+ * @param	scl		scl PIN number
+ * @param	speed		transmitting speed
+ * @return	Slow spead of transmitting speed
+ * */
 uint32_t ICACHE_FLASH_ATTR ESP_set_up(unsigned id, uint8_t sda, uint8_t scl, uint32_t speed)
 {
 	return platform_i2c_setup(id, sda, scl, speed );
 }
 
+/* Read the response data from ADXL345
+ * @param	dev_addr		The basic memory address
+ * @param	reg_addr		The memory address corresponding to certain functions
+ * @return	requested value
+ * */
 uint8_t ICACHE_FLASH_ATTR ESP_read_register(uint16_t dev_addr, uint8_t reg_addr)
 {
 	uint8_t res;
@@ -21,6 +33,12 @@ uint8_t ICACHE_FLASH_ATTR ESP_read_register(uint16_t dev_addr, uint8_t reg_addr)
 	return res;
 }
 
+/* Write data into ADXL345
+ * @param	dev_addr		The basic memory address
+ * @param	reg_addr		The memory address corresponding to certain functions
+ * @param	content			The input data
+ * @return	bolean statement whether data is passed successfully
+ * */
 uint8_t ICACHE_FLASH_ATTR ESP_write_register(uint16_t dev_addr, uint8_t reg_addr, uint8_t content)
 {
 	uint8_t res;
@@ -32,6 +50,10 @@ uint8_t ICACHE_FLASH_ATTR ESP_write_register(uint16_t dev_addr, uint8_t reg_addr
 	return res;
 }
 
+/* Initialize all relevant configuration of ADXL345
+ * @param	scale	Decide the mode set of 2g, 4g, 8g, 16g
+ * @return	void
+ * */
 void ICACHE_FLASH_ATTR ESP_init_config(uint8_t scale)
 {
 	uint8_t debug;
@@ -45,6 +67,12 @@ void ICACHE_FLASH_ATTR ESP_init_config(uint8_t scale)
 	INFO("MESURE SCALE: %d\n", debug);
 }
 
+
+/* Get the reading of certain axis from ADXL345
+ * @param	msb_addr		The address where store MSB
+ * @param	lsb_addr		The address where store MSB
+ * @return	reading of the chosen axis
+ * */
 int ICACHE_FLASH_ATTR ESP_acquire_data(uint16_t msb_addr, uint16_t lsb_addr)
 {
 	int LSB_data;

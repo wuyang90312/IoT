@@ -17,16 +17,17 @@ static ETSTimer timer;
 static uint16_t waitCycle;
 static uint16_t cycleCnter = 0;
 char str[255];
-char int_value[16];
+char int_value[3][16];
 
 void ICACHE_FLASH_ATTR
-acceleration_update()
+acceleration_update(uint8_t axis)
 {
 	char* sign;
 	int upper=0,lower,data;
+	//INFO("\nTHE OPTION: %d -> %x  %x\n", axis,MSB_ADDR_ADXL[axis], LSB_ADDR_ADXL[axis] );
 	//Disable interrupts
 	ETS_GPIO_INTR_DISABLE();
-	data = ESP_acquire_data(0x37, 0x36); // Read Z-axis value from accelerometer
+	data = ESP_acquire_data(MSB_ADDR_ADXL[axis], LSB_ADDR_ADXL[axis]); // Read corresponding axis value from accelerometer
 	//Turn interrupt back on
 	ETS_GPIO_INTR_ENABLE();
 
@@ -35,20 +36,25 @@ acceleration_update()
 	upper = (int)data/COE_SCALE;
 	lower = abs((int)data%COE_SCALE)*10000/COE_SCALE;
 	sign = (data<0&&upper>=0)?"-":""; /* add a minus sign if it is omitted */
-	os_sprintf(int_value, "%s%d.%04d", sign, upper, lower);
+	os_sprintf(int_value[axis], "%s%d.%04d", sign, upper, lower); // store the reading into the corresponding element
 }
 
 void ICACHE_FLASH_ATTR
 timer_cb(void *arg)
 {
+	int loop;
 	if(cycleCnter == 0)
 	{
 		char tmp[255], int_tmp[8];
-
-		acceleration_update(); // requre to update the reading of accelerometer
-		//INFO("\n The value is: %s\n", int_value);
-		os_sprintf(tmp,"%s%s", str,int_value); //concatenate the GET string with data value
-		//INFO("\n %s \n", tmp);
+		os_strcpy(tmp,str); // copy the URL string into temperary memory tmp
+		// Use for loop to acquire readings of all 3 axes
+		for(loop =0; loop <3; loop++)
+		{
+			acceleration_update(loop); // requre to update the reading of accelerometer
+			//INFO("\n The value is: %s\n", int_value[loop]);
+			os_sprintf(tmp,"%s&field%d=%s", tmp,(loop+2),int_value[loop]); //concatenate the GET string with data value
+			//INFO("\n %s \n", tmp);
+		}
 		uint32_t rst = (uint32_t) arg;
 		REST_Request(rst, "GET", tmp); // Update the whole string
 	}
@@ -92,7 +98,7 @@ user_continue(void)
 	INFO("\nThe configuration is:||%s||%s||%s||%u||\n", 
 	configuration->SSID, configuration->PWD, configuration->API,time);
 
-	os_sprintf(str, "/update?api_key=%s&field2=", &configuration->API);
+	os_sprintf(str, "/update?api_key=%s", &configuration->API);
 	hst = "api.thingspeak.com";
 	len = os_strlen(hst);
 

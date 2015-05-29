@@ -12,15 +12,11 @@ uint8_t ICACHE_FLASH_ATTR ESP_read_register(uint16_t dev_addr, uint8_t reg_addr)
 	uint8_t res;
 	platform_i2c_send_start(ID);
 	res= platform_i2c_send_address(ID, dev_addr, PLATFORM_I2C_DIRECTION_TRANSMITTER);
-	INFO("\n1: %d\n", res);
 	res= platform_i2c_send_byte(ID, reg_addr);
-	INFO("\n2: %d\n", res);
 	platform_i2c_send_stop(ID);
 	platform_i2c_send_start(ID);
 	res = platform_i2c_send_address(ID, dev_addr, PLATFORM_I2C_DIRECTION_RECEIVER);
-	INFO("\n3: %d\n", res);
 	res = platform_i2c_recv_byte(ID, 0);
-	INFO("\n4: %d\n", res);
 	platform_i2c_send_stop(ID);
 	return res;
 }
@@ -31,9 +27,7 @@ uint8_t ICACHE_FLASH_ATTR ESP_write_register(uint16_t dev_addr, uint8_t reg_addr
 	platform_i2c_send_start(ID);
 	platform_i2c_send_address(ID, dev_addr, PLATFORM_I2C_DIRECTION_TRANSMITTER);
 	res= platform_i2c_send_byte(ID, reg_addr);
-	INFO("\ncheck: %d\n", res);
 	res = platform_i2c_send_byte(ID, content);
-	INFO("result: %d\n", res);
 	platform_i2c_send_stop(ID);
 	return res;
 }
@@ -66,7 +60,7 @@ int ICACHE_FLASH_ATTR ESP_acquire_data(uint16_t msb_addr, uint16_t lsb_addr)
 	 * take its 2's complementary */
 	if(MSB_data == 255)
 		LSB_data = -(256-LSB_data);
-	INFO("\n The result data: %d \n", LSB_data);
+	//INFO("\n The result data: %d \n", LSB_data);
 	return LSB_data;
 }
 

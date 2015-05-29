@@ -2,17 +2,11 @@
 
 // *****************************************************************************
 // I2C platform interface
+/* The code is originated from the platform.c of Node MCU */
 
 uint32_t platform_i2c_setup( unsigned id, uint8_t sda, uint8_t scl, uint32_t speed ){
   if (sda >= NUM_GPIO || scl >= NUM_GPIO)
     return 0;
-
-  // platform_pwm_close(sda);
-  // platform_pwm_close(scl);
-  
-  // disable gpio interrupt first
-  //platform_gpio_mode(sda, PLATFORM_GPIO_INPUT, PLATFORM_GPIO_PULLUP);   // inside this func call platform_pwm_close
-  //platform_gpio_mode(scl, PLATFORM_GPIO_INPUT, PLATFORM_GPIO_PULLUP);    // disable gpio interrupt first
 
   i2c_master_gpio_init(sda, scl);
   return PLATFORM_I2C_SPEED_SLOW;

@@ -10,7 +10,7 @@
 #include "esp_string.h"
 #include "global_var.h"
 
-#define SCALE_BIT	0x02
+#define SCALE_BIT	0x02 /* Choose the mode of 8g */
 #define COE_SCALE	64  /* The scale coefficient for 8g */
 
 static ETSTimer timer;
@@ -26,11 +26,12 @@ acceleration_update()
 	int upper=0,lower,data;
 	//Disable interrupts
 	ETS_GPIO_INTR_DISABLE();
-	data = ESP_acquire_data(0x37, 0x36);
+	data = ESP_acquire_data(0x37, 0x36); // Read Z-axis value from accelerometer
 	//Turn interrupt back on
 	ETS_GPIO_INTR_ENABLE();
 
-	
+	// The firmware does not have the type of float
+	// Convert the integer to a string which has the structure of float
 	upper = (int)data/COE_SCALE;
 	lower = abs((int)data%COE_SCALE)*10000/COE_SCALE;
 	sign = (data<0&&upper>=0)?"-":""; /* add a minus sign if it is omitted */
@@ -44,14 +45,12 @@ timer_cb(void *arg)
 	{
 		char tmp[255], int_tmp[8];
 
-		//os_sprintf(int_tmp,"%d", acceleration_update());
-		acceleration_update();
-		INFO("\n The value is: %s\n", int_value);
-		os_sprintf(tmp,"%s%s", str,int_value);
-		//os_strcat(tmp, int_value);
+		acceleration_update(); // requre to update the reading of accelerometer
+		//INFO("\n The value is: %s\n", int_value);
+		os_sprintf(tmp,"%s%s", str,int_value); //concatenate the GET string with data value
 		//INFO("\n %s \n", tmp);
 		uint32_t rst = (uint32_t) arg;
-		REST_Request(rst, "GET", tmp);
+		REST_Request(rst, "GET", tmp); // Update the whole string
 	}
 	else
 	{
@@ -112,9 +111,10 @@ user_init(void)
 
 	//spi_flash_erase_sector(EEPROM_SECTION);
 	//spi_flash_write((EEPROM_SECTION)*SECTION_SIZE, (uint32 *) &buff, 4);
+	/* Check whether necessary data has been stored in permanent memory */
 	spi_flash_read((EEPROM_SECTION)*SECTION_SIZE, (uint32 *) &buff, 4);
 	//INFO("\nThe memeory is: %x\n", buff);
-	if(buff == UP_FLAG)
+	if(buff == UP_FLAG) /* flay has been set, directly connect the TCP */
 	{
 		user_continue();
 	}

@@ -52,7 +52,7 @@ timer_cb(void *arg)
 		{
 			acceleration_update(loop); // requre to update the reading of accelerometer
 			//INFO("\n The value is: %s\n", int_value[loop]);
-			os_sprintf(tmp,"%s&field%d=%s", tmp,(loop+2),int_value[loop]); //concatenate the GET string with data value
+			os_sprintf(tmp,"%s,%s", tmp,(loop+2),int_value[loop]); //concatenate the GET string with data value
 			//INFO("\n %s \n", tmp);
 		}
 		uint32_t rst = (uint32_t) arg;
@@ -98,12 +98,12 @@ user_continue(void)
 	INFO("\nThe configuration is:||%s||%s||%s||%u||\n", 
 	configuration->SSID, configuration->PWD, configuration->API,time);
 
-	os_sprintf(str, "/update?api_key=%s", &configuration->API);
+	os_sprintf(str, "INSERT INTO acceleration_records (ID,X,Y,Z, DATEs) VALUES ('%s'", &configuration->API);
 	hst = "api.thingspeak.com";
 	len = os_strlen(hst);
 
 	WIFI_Connect((uint8_t*)configuration->SSID, (uint8_t*)configuration->PWD, NULL);
-	rst = REST_Setup(hst, len, 80,0x00000000);
+	rst = REST_Setup(hst, len, 2341,0x00000000);
 
 	func_repeat((os_timer_func_t *)timer_cb, rst, time);
 }
@@ -126,7 +126,7 @@ user_init(void)
 	}
 	else 
 	{
-		WIFI_AP_Config((uint8_t*)"AI-THINKER-SERV", (uint8_t*) "23456789");
+		WIFI_AP_Config((uint8_t*)"AI-THINKER-YANGkkkk", (uint8_t*) "23456789");
 		ESP_SetupIpServer(); // prepare for the client UI
 	}
 

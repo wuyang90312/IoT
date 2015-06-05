@@ -82,7 +82,7 @@ int ICACHE_FLASH_ATTR ESP_acquire_data(uint16_t msb_addr, uint16_t lsb_addr)
 	
 	// get content of the most significant byte
 	MSB_data = ESP_read_register(BASE_ADDR, msb_addr);
-	INFO("\n The initial data: %d  %d\n", MSB_data, LSB_data);
+	//INFO("\n The initial data: %d  %d\n", MSB_data, LSB_data);
 
 	/* If MSB is 0, the value should be + sign; if MSB is 255, the value should 
 	 * take its 2's complementary */

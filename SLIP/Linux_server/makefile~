@@ -1,0 +1,1 @@
+gcc -o mysql  mysql.c mysql.h TCPserver.c $(mysql_config --libs --cflags)

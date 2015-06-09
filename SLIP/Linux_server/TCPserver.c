@@ -48,8 +48,8 @@ int main(int argc, char *argv[])
 		memcpy(destination, buffer, strlen(buffer)-1);		/* Take all characters except for the last carriage return */
 		destination[strlen(buffer)-1] = NULL;				/* End the array with NULL */
 		
-		//printf("CLIENT RECV: [%s]\n", destination);
-		MYSQL_insert(destination); /* Insert the string into local database */
+		printf("CLIENT RECV: [%s]\n", destination);
+		//MYSQL_insert(destination); /* Insert the string into local database */
 		close(consocket);
 		consocket = accept(mysocket, (struct sockaddr *)&dest, &socksize);
 	}

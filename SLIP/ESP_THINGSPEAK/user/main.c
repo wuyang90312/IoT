@@ -126,7 +126,7 @@ user_init(void)
 	}
 	else 
 	{
-		WIFI_AP_Config((uint8_t*)"AI-THINKER-SERV", (uint8_t*) "23456789");
+		WIFI_AP_Config((uint8_t*)"AI-THINKER-SERVkkk", (uint8_t*) "23456789");
 		ESP_SetupIpServer(); // prepare for the client UI
 	}
 

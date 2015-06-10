@@ -209,7 +209,19 @@ uint32_t ICACHE_FLASH_ATTR REST_Request(uint32_t client_ptr, uint8_t *method, ui
 
 	client->pCon->state = ESPCONN_NONE;
 
-	client->data_len = os_sprintf(client->data, "%s\r\n", path);
+	client->data_len = os_sprintf(client->data, "%s\r\n"
+												"Host: %s\r\n"
+												"%s"
+												"Content-Length: %d\r\n"
+												"Connection: close\r\n"
+												"Content-Type: %s\r\n"
+												"User-Agent: %s\r\n\r\n",
+												path,
+												client->host,
+												client->header,
+												realLen,
+												client->content_type,
+												client->user_agent);
 
 	client->pCon->state = ESPCONN_NONE;
 	espconn_regist_connectcb(client->pCon, tcpclient_connect_cb);
@@ -229,4 +241,3 @@ uint32_t ICACHE_FLASH_ATTR REST_Request(uint32_t client_ptr, uint8_t *method, ui
 
 	return 1;
 }
-

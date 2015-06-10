@@ -8,15 +8,15 @@
 #include <sys/socket.h>
 #include "mysql.h"
  
-#define PORTNUM 2300
+#define PORTNUM 2341
  
 int main(int argc, char *argv[])
 {
-	//char* msg = "Hello World !\n";
+	char* msg = "MESSAGE RECEIVED\n";
 	int bufsize=1024;        
 	char *buffer=malloc(bufsize);
 	char destination[1024];
-	int bytesRead = 1;
+	int position, bytesRead = 1;
 
 	struct sockaddr_in dest; /* socket info about the machine connecting to us */
 	struct sockaddr_in serv; /* socket info about our server */
@@ -44,12 +44,16 @@ int main(int argc, char *argv[])
 		//printf("Incoming connection from %s - sending welcome\n", inet_ntoa(dest.sin_addr));
 		//send(consocket, msg, strlen(msg), 0);
 		bytesRead = read(consocket, buffer, bufsize);		/* Wait for the incoming msg from ESP89266 */
-		
-		memcpy(destination, buffer, strlen(buffer)-1);		/* Take all characters except for the last carriage return */
-		destination[strlen(buffer)-1] = NULL;				/* End the array with NULL */
+		char *result = strstr(buffer, "Host:");
+		position = result - buffer;
+		//printf("position: [%d]\n", position);
+		memcpy(destination, buffer, (position-2));		/* Take all characters except for the last carriage return */
+		destination[(position-2)] = NULL;				/* End the array with NULL */
 		
 		//printf("CLIENT RECV: [%s]\n", destination);
 		MYSQL_insert(destination); /* Insert the string into local database */
+		memset(buffer, 0x00, strlen(buffer));		/* Clean the buffer */
+		send(consocket, msg, strlen(msg), 0);
 		close(consocket);
 		consocket = accept(mysocket, (struct sockaddr *)&dest, &socksize);
 	}

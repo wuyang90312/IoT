@@ -51,7 +51,7 @@ timer_cb(void *arg)
 		for(loop =0; loop <3; loop++)
 		{
 			acceleration_update(loop); // requre to update the reading of accelerometer
-			//INFO("\n The value is: %s\n", int_value[loop]);
+			INFO("\n The value is: %s\n", int_value[loop]);
 			os_sprintf(tmp,"%s&field%d=%s", tmp,(loop+2),int_value[loop]); //concatenate the GET string with data value
 			//INFO("\n %s \n", tmp);
 		}

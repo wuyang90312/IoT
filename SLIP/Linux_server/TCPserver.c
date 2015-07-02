@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 		memcpy(destination, buffer, (position-2));		/* Take all characters except for the last carriage return */
 		destination[(position-2)] = NULL;				/* End the array with NULL */
 		
-		//printf("CLIENT RECV: [%s]\n", destination);
+		printf("CLIENT RECV: [%s]\n", destination);
 		MYSQL_insert(destination); /* Insert the string into local database */
 		memset(buffer, 0x00, strlen(buffer));		/* Clean the buffer */
 		send(consocket, msg, strlen(msg), 0);
